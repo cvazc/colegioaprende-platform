@@ -10,9 +10,15 @@ class Subject extends Model
     protected $table = 'subject';
 
     public $timestamps = false;
-    
+
     public function studentControls(): HasMany
     {
         return $this->hasMany(ControlSubjectStudent::class, 'subject_id');
     }
+
+    protected $fillable = [
+        'subject_name',
+        'pdf_file',
+        'enrollment_type',
+    ];
 }
