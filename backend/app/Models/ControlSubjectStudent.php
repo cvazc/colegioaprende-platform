@@ -25,4 +25,12 @@ class ControlSubjectStudent extends Model
     {
         return $this->belongsTo(Subject::class, 'subject_id');
     }
+
+    protected $fillable = [
+        'student_id',
+        'subject_id',
+        'exam_id',
+        'score',
+        'subject_status',
+    ];
 }
