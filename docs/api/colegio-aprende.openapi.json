@@ -37,13 +37,15 @@
                 "admin": {
                   "value": {
                     "email": "admin@demo.com",
-                    "password": "Password123!"
+                    "password": "Password123!",
+                    "recaptcha_token": "{{recaptchaToken}}"
                   }
                 },
                 "student": {
                   "value": {
                     "email": "student@demo.com",
-                    "password": "Password123!"
+                    "password": "Password123!",
+                    "recaptcha_token": "{{recaptchaToken}}"
                   }
                 }
               }
@@ -420,10 +422,14 @@
     "schemas": {
       "AuthLoginRequest": {
         "type": "object",
-        "required": ["email", "password"],
+        "required": ["email", "password", "recaptcha_token"],
         "properties": {
           "email": { "type": "string", "format": "email" },
-          "password": { "type": "string", "minLength": 6 }
+          "password": { "type": "string", "minLength": 6 },
+          "recaptcha_token": {
+            "type": "string",
+            "description": "Token from reCAPTCHA (g-recaptcha-response)."
+          }
         }
       },
       "AuthLoginResponse": {
@@ -526,7 +532,8 @@
           "actual_state",
           "email",
           "course_type",
-          "enrollment_type"
+          "enrollment_type",
+          "recaptcha_token"
         ],
         "properties": {
           "first_name": { "type": "string" },
@@ -549,6 +556,10 @@
               "Estudiante Preferencial",
               "Estudiante Exclusivo"
             ]
+          },
+          "recaptcha_token": {
+            "type": "string",
+            "description": "Token from reCAPTCHA (g-recaptcha-response)."
           },
           "local_phone": { "type": "string", "nullable": true },
           "movil_phone": { "type": "string", "nullable": true },
