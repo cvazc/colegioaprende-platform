@@ -525,6 +525,76 @@
         }
       }
     },
+    "/api/admin/prospects/{prospectId}/payments/cash": {
+      "post": {
+        "summary": "Register cash payment for prospect",
+        "tags": ["Admin", "Payments"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "prospectId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminCashPaymentRequest" },
+              "example": {
+                "item_code": "cuestionario",
+                "quantity": 1,
+                "reference": "FOLIO-12345"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cash payment registered",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaymentCreateResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Prospect not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/prospects/{prospectId}/register-student": {
       "post": {
         "summary": "Register prospect as student",
@@ -925,6 +995,15 @@
             "type": "string",
             "description": "Token from reCAPTCHA (g-recaptcha-response). Required when reCAPTCHA is enabled."
           }
+        }
+      },
+      "AdminCashPaymentRequest": {
+        "type": "object",
+        "required": ["item_code"],
+        "properties": {
+          "item_code": { "type": "string" },
+          "quantity": { "type": "integer", "minimum": 1 },
+          "reference": { "type": "string" }
         }
       },
       "PaymentCreateResponse": {
