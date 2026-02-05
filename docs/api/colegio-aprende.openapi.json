@@ -156,6 +156,104 @@
         }
       }
     },
+    "/api/student/subjects/{subjectId}/unlock": {
+      "post": {
+        "summary": "Unlock subject with credits",
+        "tags": ["Students", "Subjects"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unlocked",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StudentSubjectUnlockResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Subject not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Already enabled",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Insufficient credits",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/student/payments": {
+      "get": {
+        "summary": "Get my payments",
+        "tags": ["Students", "Payments"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Payments list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StudentPaymentsResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/students/by-email": {
       "get": {
         "summary": "Find student by email",
@@ -432,6 +530,7 @@
               "schema": { "$ref": "#/components/schemas/PaymentCreateRequest" },
               "example": {
                 "provider": "mercadopago",
+                "item_code": "cuestionario",
                 "recaptcha_token": "{{recaptchaToken}}"
               }
             }
@@ -736,11 +835,14 @@
       },
       "PaymentCreateRequest": {
         "type": "object",
-        "required": ["provider"],
+        "required": ["provider", "item_code"],
         "properties": {
           "provider": {
             "type": "string",
             "enum": ["mercadopago", "paypal"]
+          },
+          "item_code": {
+            "type": "string"
           },
           "recaptcha_token": {
             "type": "string",
@@ -758,7 +860,46 @@
               "status": { "type": "string" },
               "amount": { "type": "number", "format": "float" },
               "currency": { "type": "string" },
-              "provider": { "type": "string" }
+              "provider": { "type": "string" },
+              "provider_reference_id": { "type": "string", "nullable": true },
+              "init_point": { "type": "string", "nullable": true },
+              "sandbox_init_point": { "type": "string", "nullable": true }
+            }
+          }
+        }
+      },
+      "StudentPaymentsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/StudentPayment" }
+          }
+        }
+      },
+      "StudentPayment": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "provider": { "type": "string" },
+          "status": { "type": "string" },
+          "amount": { "type": "number", "format": "float" },
+          "currency": { "type": "string" },
+          "item_code": { "type": "string", "nullable": true },
+          "approved_at": { "type": "string", "nullable": true },
+          "created_at": { "type": "string", "nullable": true }
+        }
+      },
+      "StudentSubjectUnlockResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "subject_id": { "type": "integer" },
+              "status": { "type": "string" },
+              "status_value": { "type": "integer" },
+              "credits_left": { "type": "integer" }
             }
           }
         }
