@@ -18,7 +18,7 @@ class ProspectStoreRequest extends FormRequest
             'Preparatoria 4 meses 16 sesiones',
             'Secundaria 4 meses 16 sesiones',
             'Idioma Francés',
-            'Licenciatura en Adminitración',
+            'Licenciatura en Administración',
         ];
 
         $enrollmentTypes = [
