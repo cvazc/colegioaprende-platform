@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Admin\StudentLookupController;
 use App\Http\Controllers\Api\Admin\StudentSubjectStatusController;
 use App\Http\Controllers\Api\Admin\ProspectRegistrationController;
 use App\Http\Controllers\Api\Admin\ProspectController as AdminProspectController;
+use App\Http\Controllers\Api\Admin\PaymentReconcileController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Admin\CashPaymentController;
 use App\Http\Controllers\Api\PaymentController;
@@ -31,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/students/by-email', [StudentLookupController::class, 'byEmail']);
     Route::get('/admin/prospects', [AdminProspectController::class, 'index']);
     Route::post('/admin/prospects/{prospectId}/payments/cash', [CashPaymentController::class, 'store']);
+    Route::post('/admin/payments/{paymentId}/reconcile', [PaymentReconcileController::class, 'store']);
     Route::patch(
         '/admin/students/{studentId}/subjects/{subjectId}',
         [StudentSubjectStatusController::class, 'update']
