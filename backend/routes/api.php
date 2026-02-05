@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\ProspectController;
 use App\Http\Controllers\Api\StudentCreditController;
 use App\Http\Controllers\Api\StudentExamAttemptController;
 use App\Http\Controllers\Api\StudentPaymentController;
+use App\Http\Controllers\Api\StudentProgressController;
 use App\Http\Controllers\Api\StudentSubjectController;
 use App\Http\Controllers\Api\StudentSubjectUnlockController;
 use App\Http\Controllers\Api\Admin\QuestionBankController;
@@ -29,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/student/subjects', [StudentSubjectController::class, 'index']);
+    Route::get('/student/progress', [StudentProgressController::class, 'show']);
     Route::post('/student/subjects/{subjectId}/unlock', [StudentSubjectUnlockController::class, 'store']);
     Route::post('/student/subjects/{subjectId}/exam-attempts', [StudentExamAttemptController::class, 'store']);
     Route::get('/student/exam-attempts/{attemptId}', [StudentExamAttemptController::class, 'show']);
