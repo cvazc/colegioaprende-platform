@@ -9,6 +9,7 @@ use App\Models\PaymentItem;
 use App\Models\Prospect;
 use App\Models\Student;
 use App\Services\MercadoPagoService;
+use App\Services\PayPalService;
 use Illuminate\Http\JsonResponse;
 
 class PaymentController extends Controller
@@ -81,6 +82,26 @@ class PaymentController extends Controller
             $payment->save();
         }
 
+        if ($payment->provider === 'paypal') {
+            $providerResponse = app(PayPalService::class)->createOrder(
+                $payment,
+                $prospect,
+                $item,
+                $quantity
+            );
+
+            if (!empty($providerResponse['error'])) {
+                return response()->json([
+                    'message' => 'PayPal order creation failed.',
+                    'details' => $providerResponse,
+                ], 502);
+            }
+
+            $payment->provider_reference_id = $providerResponse['id'] ?? null;
+            $payment->provider_payload = $providerResponse;
+            $payment->save();
+        }
+
         return response()->json([
             'data' => [
                 'payment_id' => $payment->id,
@@ -92,7 +113,23 @@ class PaymentController extends Controller
                 'provider_reference_id' => $payment->provider_reference_id,
                 'init_point' => $providerResponse['init_point'] ?? null,
                 'sandbox_init_point' => $providerResponse['sandbox_init_point'] ?? null,
+                'approve_url' => $this->resolvePayPalApproveUrl($providerResponse),
             ],
         ], 201);
+    }
+
+    private function resolvePayPalApproveUrl(?array $payload): ?string
+    {
+        if (!$payload || empty($payload['links']) || !is_array($payload['links'])) {
+            return null;
+        }
+
+        foreach ($payload['links'] as $link) {
+            if (($link['rel'] ?? '') === 'approve') {
+                return $link['href'] ?? null;
+            }
+        }
+
+        return null;
     }
 }

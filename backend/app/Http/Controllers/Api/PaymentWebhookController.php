@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\PaymentWebhook;
 use App\Services\MercadoPagoService;
 use App\Services\PaymentService;
+use App\Services\PayPalService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -55,6 +56,28 @@ class PaymentWebhookController extends Controller
                         $payment->provider_payment_id = (string) $providerPaymentId;
                         $payment->status = $this->normalizeStatus((string) $status);
                         $payment->provider_payload = $paymentDetails;
+                        $payment->save();
+
+                        app(PaymentService::class)->applyApprovedPayment($payment);
+                    }
+                }
+            }
+        }
+
+        if ($provider === 'paypal') {
+            $orderId = data_get($payload, 'resource.id') ?? data_get($payload, 'id');
+            if ($orderId) {
+                $order = app(PayPalService::class)->fetchOrder((string) $orderId);
+                $status = data_get($order, 'status');
+                $referenceId = data_get($order, 'purchase_units.0.reference_id');
+
+                if ($referenceId && $status) {
+                    $payment = Payment::query()->find((int) $referenceId);
+
+                    if ($payment && $payment->provider === 'paypal') {
+                        $payment->provider_payment_id = (string) $orderId;
+                        $payment->status = $this->normalizeStatus((string) $status);
+                        $payment->provider_payload = $order;
                         $payment->save();
 
                         app(PaymentService::class)->applyApprovedPayment($payment);
