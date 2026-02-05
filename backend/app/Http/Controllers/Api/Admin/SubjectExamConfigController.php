@@ -36,7 +36,6 @@ class SubjectExamConfigController extends Controller
                 'final_questions' => $config->final_questions,
                 'difficulty_min' => $config->difficulty_min,
                 'difficulty_max' => $config->difficulty_max,
-                'allow_open_practice' => $config->allow_open_practice,
             ],
         ]);
     }
@@ -73,7 +72,6 @@ class SubjectExamConfigController extends Controller
                 'final_questions' => $config->final_questions,
                 'difficulty_min' => $config->difficulty_min,
                 'difficulty_max' => $config->difficulty_max,
-                'allow_open_practice' => $config->allow_open_practice,
             ],
         ]);
     }

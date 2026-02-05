@@ -64,9 +64,6 @@ class StudentExamAttemptController extends Controller
             ?? 10);
 
         $questionTypes = ['mcq', 'true_false'];
-        if ($attemptType === 'practice' && ($config?->allow_open_practice ?? true)) {
-            $questionTypes[] = 'open';
-        }
 
         $minDifficulty = $config?->difficulty_min ?? 1;
         $maxDifficulty = $config?->difficulty_max ?? 5;
