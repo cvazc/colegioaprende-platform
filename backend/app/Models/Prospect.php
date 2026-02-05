@@ -3,12 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Prospect extends Model
 {
     protected $table = 'prospect';
 
     public $timestamps = false;
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'prospect_id');
+    }
 
     protected $fillable = [
         'first_name',
