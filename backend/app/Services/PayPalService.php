@@ -53,6 +53,50 @@ class PayPalService
         return $response->json();
     }
 
+    public function verifyWebhookSignature(array $payload, array $headers): bool
+    {
+        $webhookId = (string) config('services.paypal.webhook_id');
+        if ($webhookId === '') {
+            return true;
+        }
+
+        $transmissionId = $headers['paypal-transmission-id'] ?? null;
+        $transmissionTime = $headers['paypal-transmission-time'] ?? null;
+        $certUrl = $headers['paypal-cert-url'] ?? null;
+        $authAlgo = $headers['paypal-auth-algo'] ?? null;
+        $transmissionSig = $headers['paypal-transmission-sig'] ?? null;
+
+        if (!$transmissionId || !$transmissionTime || !$certUrl || !$authAlgo || !$transmissionSig) {
+            return false;
+        }
+
+        $token = $this->getAccessToken();
+        if (!$token) {
+            return false;
+        }
+
+        $baseUrl = rtrim((string) config('services.paypal.base_url'), '/');
+
+        $verificationPayload = [
+            'transmission_id' => $transmissionId,
+            'transmission_time' => $transmissionTime,
+            'cert_url' => $certUrl,
+            'auth_algo' => $authAlgo,
+            'transmission_sig' => $transmissionSig,
+            'webhook_id' => $webhookId,
+            'webhook_event' => $payload,
+        ];
+
+        $response = Http::withToken($token)
+            ->post($baseUrl . '/v1/notifications/verify-webhook-signature', $verificationPayload);
+
+        if (!$response->ok()) {
+            return false;
+        }
+
+        return $response->json('verification_status') === 'SUCCESS';
+    }
+
     public function fetchOrder(string $orderId): ?array
     {
         $token = $this->getAccessToken();
