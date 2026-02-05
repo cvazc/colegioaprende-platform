@@ -1,0 +1,660 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Colegio Aprende Platform",
+    "version": "1.0.0",
+    "description": "API for Colegio Aprende Platform"
+  },
+  "servers": [
+    {
+      "url": "{{baseUrl}}"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "tags": [
+    { "name": "Auth" },
+    { "name": "Students" },
+    { "name": "Subjects" },
+    { "name": "Admin" },
+    { "name": "Prospects" }
+  ],
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login",
+        "tags": ["Auth"],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AuthLoginRequest" },
+              "examples": {
+                "admin": {
+                  "value": {
+                    "email": "admin@demo.com",
+                    "password": "Password123!"
+                  }
+                },
+                "student": {
+                  "value": {
+                    "email": "student@demo.com",
+                    "password": "Password123!"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login success",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthLoginResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "Get current user",
+        "tags": ["Auth"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Current user",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MeResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "Logout",
+        "tags": ["Auth"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Logged out",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/student/subjects": {
+      "get": {
+        "summary": "Get my subjects",
+        "tags": ["Students", "Subjects"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Subjects for current student",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StudentSubjectsResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/students/by-email": {
+      "get": {
+        "summary": "Find student by email",
+        "tags": ["Admin", "Students"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "email" },
+            "example": "student@demo.com"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Student found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminStudentLookupResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Student not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/students/{studentId}/subjects/{subjectId}": {
+      "patch": {
+        "summary": "Update student subject status",
+        "tags": ["Admin", "Students"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "studentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminUpdateStudentSubjectRequest" },
+              "example": {
+                "subject_status": 0,
+                "score": 0
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminUpdateStudentSubjectResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/prospects": {
+      "post": {
+        "summary": "Create prospect",
+        "tags": ["Prospects"],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ProspectCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProspectCreateResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/prospects": {
+      "get": {
+        "summary": "List prospects",
+        "tags": ["Admin", "Prospects"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "email" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prospects list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminProspectListResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/prospects/{prospectId}/register-student": {
+      "post": {
+        "summary": "Register prospect as student",
+        "tags": ["Admin", "Prospects"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "prospectId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Student created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminProspectRegisterResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Prospect not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "AuthLoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string", "minLength": 6 }
+        }
+      },
+      "AuthLoginResponse": {
+        "type": "object",
+        "required": ["token", "role", "user"],
+        "properties": {
+          "token": { "type": "string" },
+          "role": { "type": "string", "enum": ["employee", "student"] },
+          "user": { "$ref": "#/components/schemas/UserSummary" }
+        }
+      },
+      "MeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "role": { "type": "string", "enum": ["employee", "student", "unknown"] },
+              "user": { "$ref": "#/components/schemas/UserSummary" }
+            }
+          }
+        }
+      },
+      "UserSummary": {
+        "type": "object",
+        "required": ["id", "email", "first_name", "surnames"],
+        "properties": {
+          "id": { "type": "integer" },
+          "email": { "type": "string", "format": "email" },
+          "first_name": { "type": "string" },
+          "surnames": { "type": "string" },
+          "employee_type": { "type": "integer", "nullable": true }
+        }
+      },
+      "StudentSubject": {
+        "type": "object",
+        "properties": {
+          "subject_id": { "type": "integer" },
+          "subject_name": { "type": "string", "nullable": true },
+          "enrollment_type": { "type": "string", "nullable": true },
+          "pdf_file": { "type": "string", "nullable": true },
+          "status": { "type": "string", "nullable": true },
+          "status_value": { "type": "integer", "nullable": true },
+          "score": { "type": "integer", "nullable": true },
+          "exam_id": { "type": "integer", "nullable": true }
+        }
+      },
+      "StudentSubjectsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/StudentSubject" }
+          }
+        }
+      },
+      "AdminStudentLookupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "student": { "$ref": "#/components/schemas/UserSummary" },
+              "subjects": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/StudentSubject" }
+              }
+            }
+          }
+        }
+      },
+      "AdminUpdateStudentSubjectRequest": {
+        "type": "object",
+        "required": ["subject_status"],
+        "properties": {
+          "subject_status": { "type": "integer", "enum": [0, 1, 2] },
+          "score": { "type": "integer", "minimum": 0, "maximum": 100 }
+        }
+      },
+      "AdminUpdateStudentSubjectResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "student_id": { "type": "integer" },
+              "subject_id": { "type": "integer" },
+              "status": { "type": "string" },
+              "status_value": { "type": "integer" },
+              "score": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "ProspectCreateRequest": {
+        "type": "object",
+        "required": [
+          "first_name",
+          "surnames",
+          "actual_state",
+          "email",
+          "course_type",
+          "enrollment_type"
+        ],
+        "properties": {
+          "first_name": { "type": "string" },
+          "surnames": { "type": "string" },
+          "actual_state": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "course_type": {
+            "type": "string",
+            "enum": [
+              "Preparatoria 4 meses 16 sesiones",
+              "Secundaria 4 meses 16 sesiones",
+              "Idioma Francés",
+              "Licenciatura en Administración"
+            ]
+          },
+          "enrollment_type": {
+            "type": "string",
+            "enum": [
+              "Estudiante General",
+              "Estudiante Preferencial",
+              "Estudiante Exclusivo"
+            ]
+          },
+          "local_phone": { "type": "string", "nullable": true },
+          "movil_phone": { "type": "string", "nullable": true },
+          "birth_date": { "type": "string", "format": "date", "nullable": true },
+          "actual_address": { "type": "string", "nullable": true },
+          "city": { "type": "string", "nullable": true },
+          "occupation": { "type": "string", "nullable": true },
+          "curp": { "type": "string", "nullable": true },
+          "emergency_contact": { "type": "string", "nullable": true },
+          "deposit_date": { "type": "string", "nullable": true }
+        }
+      },
+      "ProspectCreateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" },
+              "email": { "type": "string", "format": "email" }
+            }
+          }
+        }
+      },
+      "Prospect": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "first_name": { "type": "string" },
+          "surnames": { "type": "string" },
+          "local_phone": { "type": "string", "nullable": true },
+          "movil_phone": { "type": "string", "nullable": true },
+          "birth_date": { "type": "string", "format": "date", "nullable": true },
+          "actual_address": { "type": "string", "nullable": true },
+          "city": { "type": "string", "nullable": true },
+          "actual_state": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "occupation": { "type": "string", "nullable": true },
+          "curp": { "type": "string", "nullable": true },
+          "emergency_contact": { "type": "string", "nullable": true },
+          "deposit_date": { "type": "string", "nullable": true },
+          "course_type": { "type": "string" },
+          "enrollment_type": { "type": "string" },
+          "created_at": { "type": "string" }
+        }
+      },
+      "AdminProspectListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Prospect" }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "current_page": { "type": "integer" },
+              "last_page": { "type": "integer" },
+              "per_page": { "type": "integer" },
+              "total": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "AdminProspectRegisterResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "student_id": { "type": "integer" },
+              "email": { "type": "string", "format": "email" }
+            }
+          }
+        }
+      },
+      "MessageResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": { "type": "string" }
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
