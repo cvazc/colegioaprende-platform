@@ -34,19 +34,40 @@ class PaymentController extends Controller
             ], 422);
         }
 
+        if (!$item->is_billable) {
+            return response()->json([
+                'message' => 'Payment item is included and not billable.',
+            ], 422);
+        }
+
+        $quantity = (int) ($request->validated()['quantity'] ?? 1);
+        if ($item->unlock_all_subjects && $quantity !== 1) {
+            return response()->json([
+                'message' => 'Quantity is not allowed for this payment item.',
+            ], 422);
+        }
+
+        $amount = round(((float) $item->amount) * $quantity, 2);
+
         $payment = Payment::query()->create([
             'prospect_id' => $prospect->id,
             'student_id' => Student::query()->where('prospect_id', $prospect->id)->value('id'),
             'provider' => $request->validated()['provider'],
             'status' => 'pending',
             'item_code' => $item->code,
-            'amount' => $item->amount,
+            'quantity' => $quantity,
+            'amount' => $amount,
             'currency' => $item->currency,
         ]);
 
         $providerResponse = null;
         if ($payment->provider === 'mercadopago') {
-            $providerResponse = app(MercadoPagoService::class)->createPreference($payment, $prospect, $item);
+            $providerResponse = app(MercadoPagoService::class)->createPreference(
+                $payment,
+                $prospect,
+                $item,
+                $quantity
+            );
 
             if (!empty($providerResponse['error'])) {
                 return response()->json([
@@ -67,6 +88,7 @@ class PaymentController extends Controller
                 'amount' => $payment->amount,
                 'currency' => $payment->currency,
                 'provider' => $payment->provider,
+                'quantity' => $payment->quantity,
                 'provider_reference_id' => $payment->provider_reference_id,
                 'init_point' => $providerResponse['init_point'] ?? null,
                 'sandbox_init_point' => $providerResponse['sandbox_init_point'] ?? null,

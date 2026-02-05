@@ -23,8 +23,9 @@ class PaymentCreateRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'provider' => ['required', 'string', Rule::in(['mercadopago', 'paypal'])],
+            'provider' => ['required', 'string', Rule::in(['mercadopago'])],
             'item_code' => ['required', 'string', 'max:50'],
+            'quantity' => ['sometimes', 'integer', 'min:1', 'max:100'],
         ];
 
         if (config('services.recaptcha.enabled')) {

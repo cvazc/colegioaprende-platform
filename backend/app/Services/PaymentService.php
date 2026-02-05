@@ -4,9 +4,11 @@ namespace App\Services;
 
 use App\Models\Payment;
 use App\Models\PaymentItem;
+use App\Models\ControlSubjectStudent;
 use App\Models\Student;
 use App\Models\StudentCreditTransaction;
 use App\Models\StudentCreditWallet;
+use App\Enums\SubjectStatus;
 use Illuminate\Support\Facades\DB;
 
 class PaymentService
@@ -32,23 +34,28 @@ class PaymentService
             $payment->approved_at = $payment->approved_at ?: now();
             $payment->save();
 
-            if ($item && $item->credit_qty > 0) {
-                $student = $this->resolveStudent($payment);
-                if ($student) {
-                    if (!$payment->student_id) {
-                        $payment->student_id = $student->id;
-                        $payment->save();
-                    }
-                    $this->addCredits($student->id, $payment->id, $item->credit_qty, 'payment_credit');
-                }
+            if (!$item) {
+                return;
             }
 
-            if ($item && $item->auto_register && $payment->prospect) {
-                if (!$this->resolveStudent($payment)) {
-                    $student = app(ProspectRegistrationService::class)->register($payment->prospect);
-                    $payment->student_id = $student->id;
-                    $payment->save();
-                }
+            $student = $this->resolveStudent($payment);
+            if (!$student && $item->auto_register && $payment->prospect) {
+                $student = app(ProspectRegistrationService::class)->register($payment->prospect);
+                $payment->student_id = $student->id;
+                $payment->save();
+            }
+
+            if (!$student) {
+                return;
+            }
+
+            $creditsToAdd = $item->credit_qty * max(1, (int) $payment->quantity);
+            if ($creditsToAdd > 0) {
+                $this->addCredits($student->id, $payment->id, $creditsToAdd, 'payment_credit');
+            }
+
+            if ($item->unlock_all_subjects) {
+                $this->unlockAllSubjects($student->id, $payment->id, $creditsToAdd);
             }
         });
     }
@@ -81,6 +88,50 @@ class PaymentService
             'payment_id' => $paymentId,
             'delta' => $credits,
             'reason' => $reason,
+        ]);
+    }
+
+    private function unlockAllSubjects(int $studentId, int $paymentId, int $creditsAdded): void
+    {
+        $disabledCount = ControlSubjectStudent::query()
+            ->where('student_id', $studentId)
+            ->where('subject_status', SubjectStatus::Disabled)
+            ->count();
+
+        if ($disabledCount === 0) {
+            return;
+        }
+
+        ControlSubjectStudent::query()
+            ->where('student_id', $studentId)
+            ->where('subject_status', SubjectStatus::Disabled)
+            ->update(['subject_status' => SubjectStatus::Enabled->value]);
+
+        if ($creditsAdded <= 0) {
+            return;
+        }
+
+        $wallet = StudentCreditWallet::query()->firstOrCreate(
+            ['student_id' => $studentId],
+            ['balance' => 0]
+        );
+
+        $consume = min($wallet->balance, $disabledCount);
+        if ($consume <= 0) {
+            return;
+        }
+
+        $wallet->balance -= $consume;
+        $wallet->save();
+
+        StudentCreditTransaction::query()->create([
+            'student_id' => $studentId,
+            'payment_id' => $paymentId,
+            'delta' => -$consume,
+            'reason' => 'unlock_all_subjects',
+            'meta' => [
+                'subject_count' => $disabledCount,
+            ],
         ]);
     }
 }

@@ -18,6 +18,8 @@ class PaymentItem extends Model
         'credit_qty',
         'auto_register',
         'is_active',
+        'is_billable',
+        'unlock_all_subjects',
         'sort_order',
     ];
 
@@ -26,6 +28,8 @@ class PaymentItem extends Model
         'credit_qty' => 'integer',
         'auto_register' => 'boolean',
         'is_active' => 'boolean',
+        'is_billable' => 'boolean',
+        'unlock_all_subjects' => 'boolean',
         'sort_order' => 'integer',
     ];
 }

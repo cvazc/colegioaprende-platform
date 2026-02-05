@@ -34,6 +34,7 @@ class StudentPaymentController extends Controller
                 'amount' => $payment->amount,
                 'currency' => $payment->currency,
                 'item_code' => $payment->item_code,
+                'quantity' => $payment->quantity,
                 'approved_at' => $payment->approved_at?->toDateTimeString(),
                 'created_at' => $payment->created_at?->toDateTimeString(),
             ];
