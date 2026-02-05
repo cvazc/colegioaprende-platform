@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\PaymentWebhook;
+use App\Services\MercadoPagoService;
+use App\Services\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 
 class PaymentWebhookController extends Controller
 {
@@ -35,24 +36,31 @@ class PaymentWebhookController extends Controller
             'payload' => $payload,
         ]);
 
-        $providerPaymentId = data_get($payload, 'data.id')
-            ?? data_get($payload, 'resource')
-            ?? data_get($payload, 'payment_id')
-            ?? data_get($payload, 'id');
+        if ($provider === 'mercadopago') {
+            $providerPaymentId = data_get($payload, 'data.id')
+                ?? data_get($payload, 'resource')
+                ?? data_get($payload, 'payment_id')
+                ?? data_get($payload, 'id');
 
-        $status = data_get($payload, 'data.status')
-            ?? data_get($payload, 'status');
+            if ($providerPaymentId) {
+                $paymentDetails = app(MercadoPagoService::class)->fetchPayment((string) $providerPaymentId);
 
-        if ($providerPaymentId && $status) {
-            $normalizedStatus = $this->normalizeStatus((string) $status);
+                $externalReference = data_get($paymentDetails, 'external_reference');
+                $status = data_get($paymentDetails, 'status');
 
-            Payment::query()
-                ->where('provider', $provider)
-                ->where('provider_payment_id', $providerPaymentId)
-                ->update([
-                    'status' => $normalizedStatus,
-                    'provider_payload' => $payload,
-                ]);
+                if ($externalReference && $status) {
+                    $payment = Payment::query()->find((int) $externalReference);
+
+                    if ($payment && $payment->provider === 'mercadopago') {
+                        $payment->provider_payment_id = (string) $providerPaymentId;
+                        $payment->status = $this->normalizeStatus((string) $status);
+                        $payment->provider_payload = $paymentDetails;
+                        $payment->save();
+
+                        app(PaymentService::class)->applyApprovedPayment($payment);
+                    }
+                }
+            }
         }
 
         return response()->json(['message' => 'Webhook received.']);

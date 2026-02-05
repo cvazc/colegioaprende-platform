@@ -42,4 +42,10 @@ return [
         'min_score' => env('RECAPTCHA_MIN_SCORE', 0.5),
     ],
 
+    'mercadopago' => [
+        'access_token' => env('MERCADOPAGO_ACCESS_TOKEN'),
+        'base_url' => env('MERCADOPAGO_BASE_URL', 'https://api.mercadopago.com'),
+        'webhook_url' => env('MERCADOPAGO_WEBHOOK_URL'),
+    ],
+
 ];
