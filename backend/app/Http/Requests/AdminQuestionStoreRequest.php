@@ -17,6 +17,7 @@ class AdminQuestionStoreRequest extends FormRequest
         return [
             'type' => ['required', 'string', Rule::in(['mcq', 'true_false', 'open'])],
             'prompt' => ['required', 'string'],
+            'topic' => ['nullable', 'string', 'max:100'],
             'explanation' => ['nullable', 'string'],
             'difficulty' => ['sometimes', 'integer', 'min:1', 'max:5'],
             'options' => ['sometimes', 'array'],

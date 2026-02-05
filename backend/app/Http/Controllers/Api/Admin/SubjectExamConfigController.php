@@ -34,6 +34,8 @@ class SubjectExamConfigController extends Controller
                 'practice_questions' => $config->practice_questions,
                 'midterm_questions' => $config->midterm_questions,
                 'final_questions' => $config->final_questions,
+                'difficulty_min' => $config->difficulty_min,
+                'difficulty_max' => $config->difficulty_max,
                 'allow_open_practice' => $config->allow_open_practice,
             ],
         ]);
@@ -47,9 +49,20 @@ class SubjectExamConfigController extends Controller
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
+        $validated = $request->validated();
+        if (
+            array_key_exists('difficulty_min', $validated) &&
+            array_key_exists('difficulty_max', $validated) &&
+            $validated['difficulty_min'] > $validated['difficulty_max']
+        ) {
+            return response()->json([
+                'message' => 'difficulty_min must be less than or equal to difficulty_max.',
+            ], 422);
+        }
+
         $config = SubjectExamConfig::query()->updateOrCreate(
             ['subject_id' => $subjectId],
-            $request->validated()
+            $validated
         );
 
         return response()->json([
@@ -58,6 +71,8 @@ class SubjectExamConfigController extends Controller
                 'practice_questions' => $config->practice_questions,
                 'midterm_questions' => $config->midterm_questions,
                 'final_questions' => $config->final_questions,
+                'difficulty_min' => $config->difficulty_min,
+                'difficulty_max' => $config->difficulty_max,
                 'allow_open_practice' => $config->allow_open_practice,
             ],
         ]);

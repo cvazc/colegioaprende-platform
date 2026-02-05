@@ -775,6 +775,8 @@
                 "practice_questions": 12,
                 "midterm_questions": 20,
                 "final_questions": 40,
+                "difficulty_min": 2,
+                "difficulty_max": 4,
                 "allow_open_practice": true
               }
             }
@@ -1413,7 +1415,8 @@
             "type": "string",
             "enum": ["practice", "midterm", "final"]
           },
-          "question_count": { "type": "integer", "minimum": 5 }
+          "question_count": { "type": "integer", "minimum": 5 },
+          "topic": { "type": "string" }
         }
       },
       "ExamQuestionOption": {
@@ -1535,6 +1538,7 @@
         "properties": {
           "type": { "type": "string", "enum": ["mcq", "true_false", "open"] },
           "prompt": { "type": "string" },
+          "topic": { "type": "string", "nullable": true },
           "explanation": { "type": "string", "nullable": true },
           "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 },
           "options": {
@@ -1551,7 +1555,8 @@
             "properties": {
               "id": { "type": "integer" },
               "type": { "type": "string" },
-              "prompt": { "type": "string" }
+              "prompt": { "type": "string" },
+              "topic": { "type": "string", "nullable": true }
             }
           }
         }
@@ -1567,6 +1572,7 @@
                 "id": { "type": "integer" },
                 "type": { "type": "string" },
                 "prompt": { "type": "string" },
+                "topic": { "type": "string", "nullable": true },
                 "explanation": { "type": "string", "nullable": true },
                 "difficulty": { "type": "integer" },
                 "is_active": { "type": "boolean" },
@@ -1585,6 +1591,8 @@
           "practice_questions": { "type": "integer", "minimum": 5 },
           "midterm_questions": { "type": "integer", "minimum": 5 },
           "final_questions": { "type": "integer", "minimum": 5 },
+          "difficulty_min": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "difficulty_max": { "type": "integer", "minimum": 1, "maximum": 5 },
           "allow_open_practice": { "type": "boolean" }
         }
       },
@@ -1598,6 +1606,8 @@
               "practice_questions": { "type": "integer" },
               "midterm_questions": { "type": "integer" },
               "final_questions": { "type": "integer" },
+              "difficulty_min": { "type": "integer" },
+              "difficulty_max": { "type": "integer" },
               "allow_open_practice": { "type": "boolean" }
             }
           }
