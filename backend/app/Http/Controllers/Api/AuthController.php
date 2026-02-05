@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\Student;
+use App\Rules\RecaptchaToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -13,10 +14,20 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $validated = $request->validate([
+        if (!$request->has('recaptcha_token') && $request->has('g-recaptcha-response')) {
+            $request->merge(['recaptcha_token' => $request->input('g-recaptcha-response')]);
+        }
+
+        $rules = [
             'email' => ['required', 'email'],
-            'password' => ['required', 'string']
-        ]);
+            'password' => ['required', 'string'],
+        ];
+
+        if (config('services.recaptcha.enabled')) {
+            $rules['recaptcha_token'] = ['required', 'string', new RecaptchaToken()];
+        }
+
+        $validated = $request->validate($rules);
 
         $employee = Employee::query()->where('email', $validated['email'])->first();
         if ($employee && Hash::check($validated['password'], $employee->password)) {

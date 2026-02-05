@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\RecaptchaToken;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -10,6 +11,13 @@ class ProspectStoreRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (!$this->has('recaptcha_token') && $this->has('g-recaptcha-response')) {
+            $this->merge(['recaptcha_token' => $this->input('g-recaptcha-response')]);
+        }
     }
 
     public function rules(): array
@@ -27,7 +35,7 @@ class ProspectStoreRequest extends FormRequest
             'Estudiante Exclusivo',
         ];
 
-        return [
+        $rules = [
             'first_name' => ['required', 'string', 'max:255'],
             'surnames' => ['required', 'string', 'max:255'],
             'actual_state' => ['required', 'string', 'max:255'],
@@ -50,5 +58,11 @@ class ProspectStoreRequest extends FormRequest
             'emergency_contact' => ['nullable', 'string', 'max:255'],
             'deposit_date' => ['nullable', 'string', 'max:255'],
         ];
+
+        if (config('services.recaptcha.enabled')) {
+            $rules['recaptcha_token'] = ['required', 'string', new RecaptchaToken()];
+        }
+
+        return $rules;
     }
 }
