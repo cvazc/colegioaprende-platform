@@ -21,7 +21,9 @@
     { "name": "Subjects" },
     { "name": "Admin" },
     { "name": "Prospects" },
-    { "name": "Payments" }
+    { "name": "Payments" },
+    { "name": "Exams" },
+    { "name": "Questions" }
   ],
   "paths": {
     "/api/auth/login": {
@@ -212,6 +214,145 @@
           },
           "422": {
             "description": "Insufficient credits",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/student/subjects/{subjectId}/exam-attempts": {
+      "post": {
+        "summary": "Create exam attempt",
+        "tags": ["Students", "Exams"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ExamAttemptCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Attempt created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ExamAttemptCreateResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Subject not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/student/exam-attempts/{attemptId}": {
+      "get": {
+        "summary": "Get exam attempt",
+        "tags": ["Students", "Exams"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "attemptId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Attempt details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ExamAttemptDetailResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Attempt not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/student/exam-attempts/{attemptId}/answers": {
+      "post": {
+        "summary": "Submit exam answers",
+        "tags": ["Students", "Exams"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "attemptId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ExamAttemptSubmitRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Attempt updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ExamAttemptSubmitResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Attempt not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "Attempt not in progress",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" }
@@ -519,6 +660,70 @@
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/subjects/{subjectId}/questions": {
+      "get": {
+        "summary": "List questions for subject",
+        "tags": ["Admin", "Questions"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Questions list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminQuestionListResponse" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create question for subject",
+        "tags": ["Admin", "Questions"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminQuestionCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Question created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminQuestionCreateResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
               }
             }
           }
@@ -1135,6 +1340,180 @@
           "data": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/PaymentItem" }
+          }
+        }
+      },
+      "ExamAttemptCreateRequest": {
+        "type": "object",
+        "required": ["attempt_type"],
+        "properties": {
+          "attempt_type": {
+            "type": "string",
+            "enum": ["practice", "midterm", "final"]
+          },
+          "question_count": { "type": "integer", "minimum": 5 }
+        }
+      },
+      "ExamQuestionOption": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "label": { "type": "string", "nullable": true },
+          "text": { "type": "string" }
+        }
+      },
+      "ExamQuestion": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "type": { "type": "string" },
+          "prompt": { "type": "string" },
+          "options": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ExamQuestionOption" }
+          }
+        }
+      },
+      "ExamAttemptCreateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "attempt_id": { "type": "integer" },
+              "attempt_type": { "type": "string" },
+              "status": { "type": "string" },
+              "total_questions": { "type": "integer" },
+              "questions": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/ExamQuestion" }
+              }
+            }
+          }
+        }
+      },
+      "ExamAttemptAnswer": {
+        "type": "object",
+        "properties": {
+          "question_id": { "type": "integer" },
+          "answer_option_id": { "type": "integer", "nullable": true },
+          "answer_text": { "type": "string", "nullable": true }
+        }
+      },
+      "ExamAttemptSubmitRequest": {
+        "type": "object",
+        "required": ["answers"],
+        "properties": {
+          "answers": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ExamAttemptAnswer" }
+          }
+        }
+      },
+      "ExamAttemptSubmitResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "attempt_id": { "type": "integer" },
+              "status": { "type": "string" },
+              "score": { "type": "number", "format": "float" },
+              "correct_count": { "type": "integer" },
+              "total_questions": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "ExamAttemptDetailResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "attempt_id": { "type": "integer" },
+              "attempt_type": { "type": "string" },
+              "status": { "type": "string" },
+              "score": { "type": "number", "format": "float", "nullable": true },
+              "correct_count": { "type": "integer" },
+              "total_questions": { "type": "integer" },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "question_id": { "type": "integer" },
+                    "type": { "type": "string" },
+                    "prompt": { "type": "string" },
+                    "answer_option_id": { "type": "integer", "nullable": true },
+                    "answer_text": { "type": "string", "nullable": true },
+                    "is_correct": { "type": "boolean", "nullable": true },
+                    "options": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/ExamQuestionOption" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "AdminQuestionOption": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string", "nullable": true },
+          "text": { "type": "string" },
+          "is_correct": { "type": "boolean" }
+        }
+      },
+      "AdminQuestionCreateRequest": {
+        "type": "object",
+        "required": ["type", "prompt"],
+        "properties": {
+          "type": { "type": "string", "enum": ["mcq", "true_false", "open"] },
+          "prompt": { "type": "string" },
+          "explanation": { "type": "string", "nullable": true },
+          "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "options": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/AdminQuestionOption" }
+          }
+        }
+      },
+      "AdminQuestionCreateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" },
+              "type": { "type": "string" },
+              "prompt": { "type": "string" }
+            }
+          }
+        }
+      },
+      "AdminQuestionListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "integer" },
+                "type": { "type": "string" },
+                "prompt": { "type": "string" },
+                "explanation": { "type": "string", "nullable": true },
+                "difficulty": { "type": "integer" },
+                "is_active": { "type": "boolean" },
+                "options": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/AdminQuestionOption" }
+                }
+              }
+            }
           }
         }
       },
