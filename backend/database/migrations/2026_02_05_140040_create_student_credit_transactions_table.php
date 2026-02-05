@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('student_credit_transactions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('student_id');
+            $table->integer('student_id');
             $table->unsignedBigInteger('payment_id')->nullable();
             $table->integer('delta');
             $table->string('reason', 100);
