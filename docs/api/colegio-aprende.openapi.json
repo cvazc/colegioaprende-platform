@@ -20,7 +20,8 @@
     { "name": "Students" },
     { "name": "Subjects" },
     { "name": "Admin" },
-    { "name": "Prospects" }
+    { "name": "Prospects" },
+    { "name": "Payments" }
   ],
   "paths": {
     "/api/auth/login": {
@@ -410,6 +411,103 @@
           }
         }
       }
+    },
+    "/api/prospects/{prospectId}/payments": {
+      "post": {
+        "summary": "Create payment for prospect",
+        "tags": ["Prospects", "Payments"],
+        "security": [],
+        "parameters": [
+          {
+            "name": "prospectId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PaymentCreateRequest" },
+              "example": {
+                "provider": "mercadopago",
+                "recaptcha_token": "{{recaptchaToken}}"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payment created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaymentCreateResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Prospect not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payments/webhooks/{provider}": {
+      "post": {
+        "summary": "Payment webhook",
+        "tags": ["Payments"],
+        "security": [],
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["mercadopago", "paypal"]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook received",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported provider",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -632,6 +730,35 @@
             "properties": {
               "student_id": { "type": "integer" },
               "email": { "type": "string", "format": "email" }
+            }
+          }
+        }
+      },
+      "PaymentCreateRequest": {
+        "type": "object",
+        "required": ["provider"],
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": ["mercadopago", "paypal"]
+          },
+          "recaptcha_token": {
+            "type": "string",
+            "description": "Token from reCAPTCHA (g-recaptcha-response). Required when reCAPTCHA is enabled."
+          }
+        }
+      },
+      "PaymentCreateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "payment_id": { "type": "integer" },
+              "status": { "type": "string" },
+              "amount": { "type": "number", "format": "float" },
+              "currency": { "type": "string" },
+              "provider": { "type": "string" }
             }
           }
         }
