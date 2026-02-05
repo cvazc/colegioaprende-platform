@@ -5,12 +5,16 @@ use App\Http\Controllers\Api\Admin\StudentSubjectStatusController;
 use App\Http\Controllers\Api\Admin\ProspectRegistrationController;
 use App\Http\Controllers\Api\Admin\ProspectController as AdminProspectController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\ProspectController;
 use App\Http\Controllers\Api\StudentSubjectController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/prospects', [ProspectController::class, 'store']);
+Route::post('/prospects/{prospectId}/payments', [PaymentController::class, 'store']);
+Route::post('/payments/webhooks/{provider}', [PaymentWebhookController::class, 'handle']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
