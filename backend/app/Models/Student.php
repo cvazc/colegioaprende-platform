@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\StudentCreditWallet;
 
 class Student extends Authenticatable
 {
@@ -21,7 +23,13 @@ class Student extends Authenticatable
         return $this->hasMany(ControlSubjectStudent::class, 'student_id');
     }
 
+    public function creditWallet(): HasOne
+    {
+        return $this->hasOne(StudentCreditWallet::class, 'student_id');
+    }
+
     protected $fillable = [
+        'prospect_id',
         'first_name',
         'surnames',
         'local_phone',
