@@ -730,6 +730,68 @@
         }
       }
     },
+    "/api/admin/subjects/{subjectId}/exam-config": {
+      "get": {
+        "summary": "Get subject exam config",
+        "tags": ["Admin", "Exams"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Config",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SubjectExamConfigResponse" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update subject exam config",
+        "tags": ["Admin", "Exams"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "subjectId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SubjectExamConfigRequest" },
+              "example": {
+                "practice_questions": 12,
+                "midterm_questions": 20,
+                "final_questions": 40,
+                "allow_open_practice": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SubjectExamConfigResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/prospects/{prospectId}/payments/cash": {
       "post": {
         "summary": "Register cash payment for prospect",
@@ -1513,6 +1575,30 @@
                   "items": { "$ref": "#/components/schemas/AdminQuestionOption" }
                 }
               }
+            }
+          }
+        }
+      },
+      "SubjectExamConfigRequest": {
+        "type": "object",
+        "properties": {
+          "practice_questions": { "type": "integer", "minimum": 5 },
+          "midterm_questions": { "type": "integer", "minimum": 5 },
+          "final_questions": { "type": "integer", "minimum": 5 },
+          "allow_open_practice": { "type": "boolean" }
+        }
+      },
+      "SubjectExamConfigResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "subject_id": { "type": "integer" },
+              "practice_questions": { "type": "integer" },
+              "midterm_questions": { "type": "integer" },
+              "final_questions": { "type": "integer" },
+              "allow_open_practice": { "type": "boolean" }
             }
           }
         }
