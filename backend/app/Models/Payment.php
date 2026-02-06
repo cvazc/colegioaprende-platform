@@ -15,6 +15,7 @@ class Payment extends Model
         'provider',
         'status',
         'item_code',
+        'quantity',
         'amount',
         'currency',
         'provider_payment_id',
@@ -27,6 +28,7 @@ class Payment extends Model
         'provider_payload' => 'array',
         'amount' => 'decimal:2',
         'approved_at' => 'datetime',
+        'quantity' => 'integer',
     ];
 
     public function prospect(): BelongsTo

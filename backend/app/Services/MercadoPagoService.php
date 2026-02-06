@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Http;
 
 class MercadoPagoService
 {
-    public function createPreference(Payment $payment, Prospect $prospect, PaymentItem $item): array
+    public function createPreference(Payment $payment, Prospect $prospect, PaymentItem $item, int $quantity): array
     {
         $accessToken = (string) config('services.mercadopago.access_token');
         $baseUrl = rtrim((string) config('services.mercadopago.base_url'), '/');
@@ -21,7 +21,7 @@ class MercadoPagoService
             'items' => [
                 [
                     'title' => $item->name,
-                    'quantity' => 1,
+                    'quantity' => $quantity,
                     'unit_price' => (float) $item->amount,
                     'currency_id' => $item->currency,
                 ],

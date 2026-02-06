@@ -1,22 +1,27 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PaymentCreateRequest;
+use App\Http\Requests\AdminCashPaymentRequest;
+use App\Models\Employee;
 use App\Models\Payment;
 use App\Models\PaymentItem;
 use App\Models\Prospect;
 use App\Models\Student;
-use App\Services\MercadoPagoService;
-use Illuminate\Http\JsonResponse;
+use App\Services\PaymentService;
 
-class PaymentController extends Controller
+class CashPaymentController extends Controller
 {
-    public function store(PaymentCreateRequest $request, int $prospectId): JsonResponse
+    public function store(AdminCashPaymentRequest $request, int $prospectId)
     {
-        $prospect = Prospect::query()->find($prospectId);
+        $user = $request->user();
 
+        if (!($user instanceof Employee)) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        $prospect = Prospect::query()->find($prospectId);
         if (!$prospect) {
             return response()->json(['message' => 'Prospect not found.'], 404);
         }
@@ -52,34 +57,16 @@ class PaymentController extends Controller
         $payment = Payment::query()->create([
             'prospect_id' => $prospect->id,
             'student_id' => Student::query()->where('prospect_id', $prospect->id)->value('id'),
-            'provider' => $request->validated()['provider'],
-            'status' => 'pending',
+            'provider' => 'cash',
+            'status' => 'approved',
             'item_code' => $item->code,
             'quantity' => $quantity,
             'amount' => $amount,
             'currency' => $item->currency,
+            'provider_reference_id' => $request->validated()['reference'] ?? null,
         ]);
 
-        $providerResponse = null;
-        if ($payment->provider === 'mercadopago') {
-            $providerResponse = app(MercadoPagoService::class)->createPreference(
-                $payment,
-                $prospect,
-                $item,
-                $quantity
-            );
-
-            if (!empty($providerResponse['error'])) {
-                return response()->json([
-                    'message' => 'Mercado Pago preference creation failed.',
-                    'details' => $providerResponse,
-                ], 502);
-            }
-
-            $payment->provider_reference_id = $providerResponse['id'] ?? null;
-            $payment->provider_payload = $providerResponse;
-            $payment->save();
-        }
+        app(PaymentService::class)->applyApprovedPayment($payment);
 
         return response()->json([
             'data' => [
@@ -89,9 +76,6 @@ class PaymentController extends Controller
                 'currency' => $payment->currency,
                 'provider' => $payment->provider,
                 'quantity' => $payment->quantity,
-                'provider_reference_id' => $payment->provider_reference_id,
-                'init_point' => $providerResponse['init_point'] ?? null,
-                'sandbox_init_point' => $providerResponse['sandbox_init_point'] ?? null,
             ],
         ], 201);
     }

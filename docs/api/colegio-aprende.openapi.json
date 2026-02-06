@@ -254,6 +254,39 @@
         }
       }
     },
+    "/api/student/credits": {
+      "get": {
+        "summary": "Get my credits",
+        "tags": ["Students", "Payments"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Credits balance and transactions",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StudentCreditsResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/students/by-email": {
       "get": {
         "summary": "Find student by email",
@@ -412,6 +445,45 @@
         }
       }
     },
+    "/api/payment-items": {
+      "get": {
+        "summary": "List payment items",
+        "tags": ["Payments"],
+        "security": [],
+        "parameters": [
+          {
+            "name": "course_type",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "enrollment_type",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment items",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaymentItemsResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/prospects": {
       "get": {
         "summary": "List prospects",
@@ -447,6 +519,76 @@
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/prospects/{prospectId}/payments/cash": {
+      "post": {
+        "summary": "Register cash payment for prospect",
+        "tags": ["Admin", "Payments"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "prospectId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminCashPaymentRequest" },
+              "example": {
+                "item_code": "cuestionario",
+                "quantity": 1,
+                "reference": "FOLIO-12345"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cash payment registered",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaymentCreateResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Prospect not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
               }
             }
           }
@@ -531,6 +673,7 @@
               "example": {
                 "provider": "mercadopago",
                 "item_code": "cuestionario",
+                "quantity": 1,
                 "recaptcha_token": "{{recaptchaToken}}"
               }
             }
@@ -839,15 +982,28 @@
         "properties": {
           "provider": {
             "type": "string",
-            "enum": ["mercadopago", "paypal"]
+            "enum": ["mercadopago"]
           },
           "item_code": {
             "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
           },
           "recaptcha_token": {
             "type": "string",
             "description": "Token from reCAPTCHA (g-recaptcha-response). Required when reCAPTCHA is enabled."
           }
+        }
+      },
+      "AdminCashPaymentRequest": {
+        "type": "object",
+        "required": ["item_code"],
+        "properties": {
+          "item_code": { "type": "string" },
+          "quantity": { "type": "integer", "minimum": 1 },
+          "reference": { "type": "string" }
         }
       },
       "PaymentCreateResponse": {
@@ -861,10 +1017,34 @@
               "amount": { "type": "number", "format": "float" },
               "currency": { "type": "string" },
               "provider": { "type": "string" },
+              "quantity": { "type": "integer" },
               "provider_reference_id": { "type": "string", "nullable": true },
               "init_point": { "type": "string", "nullable": true },
               "sandbox_init_point": { "type": "string", "nullable": true }
             }
+          }
+        }
+      },
+      "PaymentItem": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string" },
+          "name": { "type": "string" },
+          "amount": { "type": "number", "format": "float" },
+          "currency": { "type": "string" },
+          "credit_qty": { "type": "integer" },
+          "auto_register": { "type": "boolean" },
+          "is_billable": { "type": "boolean" },
+          "unlock_all_subjects": { "type": "boolean" },
+          "sort_order": { "type": "integer" }
+        }
+      },
+      "PaymentItemsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PaymentItem" }
           }
         }
       },
@@ -886,6 +1066,7 @@
           "amount": { "type": "number", "format": "float" },
           "currency": { "type": "string" },
           "item_code": { "type": "string", "nullable": true },
+          "quantity": { "type": "integer", "nullable": true },
           "approved_at": { "type": "string", "nullable": true },
           "created_at": { "type": "string", "nullable": true }
         }
@@ -900,6 +1081,31 @@
               "status": { "type": "string" },
               "status_value": { "type": "integer" },
               "credits_left": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "StudentCreditTransaction": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "delta": { "type": "integer" },
+          "reason": { "type": "string" },
+          "meta": { "type": "object", "nullable": true },
+          "created_at": { "type": "string", "nullable": true }
+        }
+      },
+      "StudentCreditsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "balance": { "type": "integer" },
+              "transactions": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/StudentCreditTransaction" }
+              }
             }
           }
         }
