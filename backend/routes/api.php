@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\StudentPaymentController;
 use App\Http\Controllers\Api\StudentSubjectController;
 use App\Http\Controllers\Api\StudentSubjectUnlockController;
 use App\Http\Controllers\Api\Admin\QuestionBankController;
+use App\Http\Controllers\Api\Admin\SubjectExamConfigController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -40,6 +41,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/payments/{paymentId}/reconcile', [PaymentReconcileController::class, 'store']);
     Route::get('/admin/subjects/{subjectId}/questions', [QuestionBankController::class, 'index']);
     Route::post('/admin/subjects/{subjectId}/questions', [QuestionBankController::class, 'store']);
+    Route::get('/admin/subjects/{subjectId}/exam-config', [SubjectExamConfigController::class, 'show']);
+    Route::put('/admin/subjects/{subjectId}/exam-config', [SubjectExamConfigController::class, 'update']);
     Route::patch(
         '/admin/students/{studentId}/subjects/{subjectId}',
         [StudentSubjectStatusController::class, 'update']

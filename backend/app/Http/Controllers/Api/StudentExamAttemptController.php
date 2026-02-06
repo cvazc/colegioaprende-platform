@@ -11,6 +11,7 @@ use App\Models\ExamAttempt;
 use App\Models\ExamAttemptQuestion;
 use App\Models\Question;
 use App\Models\QuestionOption;
+use App\Models\SubjectExamConfig;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -39,15 +40,29 @@ class StudentExamAttemptController extends Controller
         }
 
         $attemptType = $request->validated()['attempt_type'];
+        $config = SubjectExamConfig::query()
+            ->where('subject_id', $subjectId)
+            ->first();
+
         $defaults = [
             'practice' => 10,
             'midterm' => 20,
             'final' => 40,
         ];
-        $questionCount = (int) ($request->validated()['question_count'] ?? $defaults[$attemptType] ?? 10);
+
+        $configCounts = [
+            'practice' => $config?->practice_questions,
+            'midterm' => $config?->midterm_questions,
+            'final' => $config?->final_questions,
+        ];
+
+        $questionCount = (int) ($request->validated()['question_count']
+            ?? $configCounts[$attemptType]
+            ?? $defaults[$attemptType]
+            ?? 10);
 
         $questionTypes = ['mcq', 'true_false'];
-        if ($attemptType === 'practice') {
+        if ($attemptType === 'practice' && ($config?->allow_open_practice ?? true)) {
             $questionTypes[] = 'open';
         }
 
