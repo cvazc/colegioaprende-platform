@@ -741,7 +741,7 @@
             }
           },
           "400": {
-            "description": "Unsupported provider",
+            "description": "Unsupported provider or invalid signature",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" }

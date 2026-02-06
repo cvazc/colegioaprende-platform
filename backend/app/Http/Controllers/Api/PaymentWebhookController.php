@@ -23,6 +23,20 @@ class PaymentWebhookController extends Controller
 
         $payload = $request->all();
 
+        if ($provider === 'paypal') {
+            $headers = [
+                'paypal-transmission-id' => $request->header('paypal-transmission-id'),
+                'paypal-transmission-time' => $request->header('paypal-transmission-time'),
+                'paypal-cert-url' => $request->header('paypal-cert-url'),
+                'paypal-auth-algo' => $request->header('paypal-auth-algo'),
+                'paypal-transmission-sig' => $request->header('paypal-transmission-sig'),
+            ];
+
+            if (!app(PayPalService::class)->verifyWebhookSignature($payload, $headers)) {
+                return response()->json(['message' => 'Invalid PayPal webhook signature.'], 400);
+            }
+        }
+
         $eventType = data_get($payload, 'type')
             ?? data_get($payload, 'event_type')
             ?? data_get($payload, 'action');
