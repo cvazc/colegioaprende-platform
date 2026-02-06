@@ -13,6 +13,7 @@ class Question extends Model
         'subject_id',
         'type',
         'prompt',
+        'topic',
         'explanation',
         'difficulty',
         'is_active',

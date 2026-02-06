@@ -39,7 +39,9 @@ class StudentExamAttemptController extends Controller
             return response()->json(['message' => 'Subject is not enabled.'], 403);
         }
 
-        $attemptType = $request->validated()['attempt_type'];
+        $validated = $request->validated();
+        $attemptType = $validated['attempt_type'];
+        $topic = $validated['topic'] ?? null;
         $config = SubjectExamConfig::query()
             ->where('subject_id', $subjectId)
             ->first();
@@ -66,10 +68,23 @@ class StudentExamAttemptController extends Controller
             $questionTypes[] = 'open';
         }
 
-        $questions = Question::query()
+        $minDifficulty = $config?->difficulty_min ?? 1;
+        $maxDifficulty = $config?->difficulty_max ?? 5;
+        if ($minDifficulty > $maxDifficulty) {
+            [$minDifficulty, $maxDifficulty] = [$maxDifficulty, $minDifficulty];
+        }
+
+        $questionsQuery = Question::query()
             ->where('subject_id', $subjectId)
             ->where('is_active', true)
             ->whereIn('type', $questionTypes)
+            ->whereBetween('difficulty', [$minDifficulty, $maxDifficulty]);
+
+        if ($topic) {
+            $questionsQuery->where('topic', $topic);
+        }
+
+        $questions = $questionsQuery
             ->inRandomOrder()
             ->limit($questionCount)
             ->with(['options' => function ($query) {

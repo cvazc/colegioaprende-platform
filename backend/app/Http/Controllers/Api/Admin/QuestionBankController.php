@@ -30,6 +30,7 @@ class QuestionBankController extends Controller
                     'id' => $question->id,
                     'type' => $question->type,
                     'prompt' => $question->prompt,
+                    'topic' => $question->topic,
                     'explanation' => $question->explanation,
                     'difficulty' => $question->difficulty,
                     'is_active' => $question->is_active,
@@ -81,6 +82,7 @@ class QuestionBankController extends Controller
                 'subject_id' => $subjectId,
                 'type' => $type,
                 'prompt' => $validated['prompt'],
+                'topic' => $validated['topic'] ?? null,
                 'explanation' => $validated['explanation'] ?? null,
                 'difficulty' => $validated['difficulty'] ?? 1,
                 'is_active' => true,
@@ -106,6 +108,7 @@ class QuestionBankController extends Controller
                 'id' => $question->id,
                 'type' => $question->type,
                 'prompt' => $question->prompt,
+                'topic' => $question->topic,
             ],
         ], 201);
     }

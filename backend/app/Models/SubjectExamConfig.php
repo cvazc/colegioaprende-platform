@@ -13,6 +13,8 @@ class SubjectExamConfig extends Model
         'practice_questions',
         'midterm_questions',
         'final_questions',
+        'difficulty_min',
+        'difficulty_max',
         'allow_open_practice',
     ];
 
@@ -20,6 +22,8 @@ class SubjectExamConfig extends Model
         'practice_questions' => 'integer',
         'midterm_questions' => 'integer',
         'final_questions' => 'integer',
+        'difficulty_min' => 'integer',
+        'difficulty_max' => 'integer',
         'allow_open_practice' => 'boolean',
     ];
 }

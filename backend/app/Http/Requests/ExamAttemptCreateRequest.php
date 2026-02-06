@@ -17,6 +17,7 @@ class ExamAttemptCreateRequest extends FormRequest
         return [
             'attempt_type' => ['required', 'string', Rule::in(['practice', 'midterm', 'final'])],
             'question_count' => ['sometimes', 'integer', 'min:5', 'max:100'],
+            'topic' => ['sometimes', 'string', 'max:100'],
         ];
     }
 }
