@@ -46,10 +46,15 @@ class StudentExamAttemptController extends Controller
         ];
         $questionCount = (int) ($request->validated()['question_count'] ?? $defaults[$attemptType] ?? 10);
 
+        $questionTypes = ['mcq', 'true_false'];
+        if ($attemptType === 'practice') {
+            $questionTypes[] = 'open';
+        }
+
         $questions = Question::query()
             ->where('subject_id', $subjectId)
             ->where('is_active', true)
-            ->whereIn('type', ['mcq', 'true_false'])
+            ->whereIn('type', $questionTypes)
             ->inRandomOrder()
             ->limit($questionCount)
             ->with(['options' => function ($query) {
@@ -248,7 +253,7 @@ class StudentExamAttemptController extends Controller
                 ->count();
 
             $attempt->correct_count = $correctCount;
-            $attempt->score = $gradableCount > 0 ? round(($correctCount / $gradableCount) * 100, 2) : 0;
+            $attempt->score = $gradableCount > 0 ? round(($correctCount / $gradableCount) * 100, 2) : null;
 
             if ($answeredCount >= $attempt->total_questions) {
                 $attempt->status = 'completed';
