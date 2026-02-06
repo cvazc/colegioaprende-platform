@@ -62,19 +62,17 @@ class QuestionBankController extends Controller
         $type = $validated['type'];
         $options = $validated['options'] ?? [];
 
-        if ($type !== 'open') {
-            if (count($options) < 2) {
-                return response()->json([
-                    'message' => 'At least two options are required.',
-                ], 422);
-            }
+        if (count($options) < 2) {
+            return response()->json([
+                'message' => 'At least two options are required.',
+            ], 422);
+        }
 
-            $correctCount = collect($options)->where('is_correct', true)->count();
-            if ($correctCount !== 1) {
-                return response()->json([
-                    'message' => 'Exactly one correct option is required.',
-                ], 422);
-            }
+        $correctCount = collect($options)->where('is_correct', true)->count();
+        if ($correctCount !== 1) {
+            return response()->json([
+                'message' => 'Exactly one correct option is required.',
+            ], 422);
         }
 
         $question = DB::transaction(function () use ($validated, $subjectId, $options, $type) {
@@ -88,16 +86,14 @@ class QuestionBankController extends Controller
                 'is_active' => true,
             ]);
 
-            if ($type !== 'open') {
-                foreach ($options as $index => $option) {
-                    QuestionOption::query()->create([
-                        'question_id' => $question->id,
-                        'label' => $option['label'] ?? null,
-                        'text' => $option['text'],
-                        'is_correct' => (bool) ($option['is_correct'] ?? false),
-                        'sort_order' => $index + 1,
-                    ]);
-                }
+            foreach ($options as $index => $option) {
+                QuestionOption::query()->create([
+                    'question_id' => $question->id,
+                    'label' => $option['label'] ?? null,
+                    'text' => $option['text'],
+                    'is_correct' => (bool) ($option['is_correct'] ?? false),
+                    'sort_order' => $index + 1,
+                ]);
             }
 
             return $question;

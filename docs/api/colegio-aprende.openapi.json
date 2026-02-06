@@ -776,8 +776,7 @@
                 "midterm_questions": 20,
                 "final_questions": 40,
                 "difficulty_min": 2,
-                "difficulty_max": 4,
-                "allow_open_practice": true
+                "difficulty_max": 4
               }
             }
           }
@@ -1536,7 +1535,7 @@
         "type": "object",
         "required": ["type", "prompt"],
         "properties": {
-          "type": { "type": "string", "enum": ["mcq", "true_false", "open"] },
+          "type": { "type": "string", "enum": ["mcq", "true_false"] },
           "prompt": { "type": "string" },
           "topic": { "type": "string", "nullable": true },
           "explanation": { "type": "string", "nullable": true },
@@ -1592,8 +1591,7 @@
           "midterm_questions": { "type": "integer", "minimum": 5 },
           "final_questions": { "type": "integer", "minimum": 5 },
           "difficulty_min": { "type": "integer", "minimum": 1, "maximum": 5 },
-          "difficulty_max": { "type": "integer", "minimum": 1, "maximum": 5 },
-          "allow_open_practice": { "type": "boolean" }
+          "difficulty_max": { "type": "integer", "minimum": 1, "maximum": 5 }
         }
       },
       "SubjectExamConfigResponse": {
@@ -1607,8 +1605,7 @@
               "midterm_questions": { "type": "integer" },
               "final_questions": { "type": "integer" },
               "difficulty_min": { "type": "integer" },
-              "difficulty_max": { "type": "integer" },
-              "allow_open_practice": { "type": "boolean" }
+              "difficulty_max": { "type": "integer" }
             }
           }
         }

@@ -19,7 +19,6 @@ class AdminSubjectExamConfigRequest extends FormRequest
             'final_questions' => ['sometimes', 'integer', 'min:5', 'max:100'],
             'difficulty_min' => ['sometimes', 'integer', 'min:1', 'max:5'],
             'difficulty_max' => ['sometimes', 'integer', 'min:1', 'max:5'],
-            'allow_open_practice' => ['sometimes', 'boolean'],
         ];
     }
 }

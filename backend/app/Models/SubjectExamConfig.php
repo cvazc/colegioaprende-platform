@@ -15,7 +15,6 @@ class SubjectExamConfig extends Model
         'final_questions',
         'difficulty_min',
         'difficulty_max',
-        'allow_open_practice',
     ];
 
     protected $casts = [
@@ -24,6 +23,5 @@ class SubjectExamConfig extends Model
         'final_questions' => 'integer',
         'difficulty_min' => 'integer',
         'difficulty_max' => 'integer',
-        'allow_open_practice' => 'boolean',
     ];
 }
