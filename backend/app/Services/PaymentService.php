@@ -19,6 +19,10 @@ class PaymentService
             return;
         }
 
+        if ($payment->approved_at) {
+            return;
+        }
+
         $payment->loadMissing('prospect');
 
         $item = null;

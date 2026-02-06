@@ -595,6 +595,74 @@
         }
       }
     },
+    "/api/admin/payments/{paymentId}/reconcile": {
+      "post": {
+        "summary": "Reconcile payment with provider",
+        "tags": ["Admin", "Payments"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminPaymentReconcileRequest" },
+              "example": {
+                "provider_payment_id": "1234567890"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reconciled",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaymentReconcileResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Payment not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/prospects/{prospectId}/register-student": {
       "post": {
         "summary": "Register prospect as student",
@@ -1004,6 +1072,27 @@
           "item_code": { "type": "string" },
           "quantity": { "type": "integer", "minimum": 1 },
           "reference": { "type": "string" }
+        }
+      },
+      "AdminPaymentReconcileRequest": {
+        "type": "object",
+        "properties": {
+          "provider_payment_id": { "type": "string" }
+        }
+      },
+      "PaymentReconcileResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "payment_id": { "type": "integer" },
+              "provider": { "type": "string" },
+              "status": { "type": "string" },
+              "provider_payment_id": { "type": "string", "nullable": true },
+              "approved_at": { "type": "string", "nullable": true }
+            }
+          }
         }
       },
       "PaymentCreateResponse": {
