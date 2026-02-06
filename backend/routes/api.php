@@ -12,9 +12,11 @@ use App\Http\Controllers\Api\PaymentItemController;
 use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\ProspectController;
 use App\Http\Controllers\Api\StudentCreditController;
+use App\Http\Controllers\Api\StudentExamAttemptController;
 use App\Http\Controllers\Api\StudentPaymentController;
 use App\Http\Controllers\Api\StudentSubjectController;
 use App\Http\Controllers\Api\StudentSubjectUnlockController;
+use App\Http\Controllers\Api\Admin\QuestionBankController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -27,12 +29,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/student/subjects', [StudentSubjectController::class, 'index']);
     Route::post('/student/subjects/{subjectId}/unlock', [StudentSubjectUnlockController::class, 'store']);
+    Route::post('/student/subjects/{subjectId}/exam-attempts', [StudentExamAttemptController::class, 'store']);
+    Route::get('/student/exam-attempts/{attemptId}', [StudentExamAttemptController::class, 'show']);
+    Route::post('/student/exam-attempts/{attemptId}/answers', [StudentExamAttemptController::class, 'submit']);
     Route::get('/student/payments', [StudentPaymentController::class, 'index']);
     Route::get('/student/credits', [StudentCreditController::class, 'show']);
     Route::get('/admin/students/by-email', [StudentLookupController::class, 'byEmail']);
     Route::get('/admin/prospects', [AdminProspectController::class, 'index']);
     Route::post('/admin/prospects/{prospectId}/payments/cash', [CashPaymentController::class, 'store']);
     Route::post('/admin/payments/{paymentId}/reconcile', [PaymentReconcileController::class, 'store']);
+    Route::get('/admin/subjects/{subjectId}/questions', [QuestionBankController::class, 'index']);
+    Route::post('/admin/subjects/{subjectId}/questions', [QuestionBankController::class, 'store']);
     Route::patch(
         '/admin/students/{studentId}/subjects/{subjectId}',
         [StudentSubjectStatusController::class, 'update']
