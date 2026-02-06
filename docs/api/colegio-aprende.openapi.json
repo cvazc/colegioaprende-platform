@@ -158,6 +158,39 @@
         }
       }
     },
+    "/api/student/progress": {
+      "get": {
+        "summary": "Get student progress",
+        "tags": ["Students"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Progress summary",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StudentProgressResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/student/subjects/{subjectId}/unlock": {
       "post": {
         "summary": "Unlock subject with credits",
@@ -1631,6 +1664,39 @@
           "quantity": { "type": "integer", "nullable": true },
           "approved_at": { "type": "string", "nullable": true },
           "created_at": { "type": "string", "nullable": true }
+        }
+      },
+      "StudentProgressResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "overall": {
+                "type": "object",
+                "properties": {
+                  "percentage": { "type": "number", "format": "float" },
+                  "approved_count": { "type": "integer" },
+                  "enabled_count": { "type": "integer" },
+                  "disabled_count": { "type": "integer" },
+                  "total_count": { "type": "integer" }
+                }
+              },
+              "subjects": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "subject_id": { "type": "integer" },
+                    "subject_name": { "type": "string", "nullable": true },
+                    "status": { "type": "string", "nullable": true },
+                    "status_value": { "type": "integer", "nullable": true },
+                    "progress_percent": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "StudentSubjectUnlockResponse": {
