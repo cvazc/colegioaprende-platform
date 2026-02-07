@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\StudentStatus;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\StudentCreditWallet;
 
 class Student extends Authenticatable
 {
@@ -28,6 +28,11 @@ class Student extends Authenticatable
         return $this->hasOne(StudentCreditWallet::class, 'student_id');
     }
 
+    public function calendarAssignment(): HasOne
+    {
+        return $this->hasOne(StudentCalendar::class, 'student_id');
+    }
+
     protected $fillable = [
         'prospect_id',
         'first_name',
@@ -46,5 +51,13 @@ class Student extends Authenticatable
         'password',
         'course_type',
         'enrollment_type',
+        'status',
+        'profile_completed_at',
+        'profile_photo_path',
+    ];
+
+    protected $casts = [
+        'status' => StudentStatus::class,
+        'profile_completed_at' => 'datetime',
     ];
 }

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\ProspectStatus;
+use App\Enums\StudentStatus;
 use App\Enums\SubjectStatus;
 use App\Models\ControlSubjectStudent;
 use App\Models\Exam;
@@ -70,6 +72,8 @@ class ProspectRegistrationService
                 'password' => Hash::make(Str::random(12)),
                 'course_type' => $prospect->course_type,
                 'enrollment_type' => $prospect->enrollment_type,
+                'status' => StudentStatus::OnboardingPending,
+                'profile_completed_at' => null,
             ]);
 
             foreach ($subjects as $subject) {
@@ -92,6 +96,10 @@ class ProspectRegistrationService
                     'subject_status' => SubjectStatus::Disabled->value,
                 ]);
             }
+
+            $prospect->status = ProspectStatus::RegisteredStudent;
+            $prospect->registered_as_student_at = now();
+            $prospect->save();
 
             return $student;
         });
