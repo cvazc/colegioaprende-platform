@@ -1,10 +1,12 @@
 <?php
 
+use App\Enums\EmployeeAbility;
 use App\Http\Controllers\Api\Admin\StudentLookupController;
 use App\Http\Controllers\Api\Admin\StudentSubjectStatusController;
 use App\Http\Controllers\Api\Admin\ProspectRegistrationController;
 use App\Http\Controllers\Api\Admin\ProspectController as AdminProspectController;
 use App\Http\Controllers\Api\Admin\PaymentReconcileController;
+use App\Http\Controllers\Api\Admin\EmployeeController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Admin\CashPaymentController;
 use App\Http\Controllers\Api\Admin\CalendarTemplateController;
@@ -47,24 +49,38 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/student/calendar', [StudentCalendarController::class, 'show']);
     });
 
-    Route::get('/admin/students/by-email', [StudentLookupController::class, 'byEmail']);
-    Route::get('/admin/prospects', [AdminProspectController::class, 'index']);
-    Route::get('/admin/calendar-templates', [CalendarTemplateController::class, 'index']);
-    Route::post('/admin/calendar-templates', [CalendarTemplateController::class, 'store']);
-    Route::put('/admin/calendar-templates/{templateId}', [CalendarTemplateController::class, 'update']);
-    Route::post('/admin/students/{studentId}/calendar-assignment', [StudentCalendarAssignmentController::class, 'assign']);
-    Route::post('/admin/prospects/{prospectId}/payments/cash', [CashPaymentController::class, 'store']);
-    Route::post('/admin/payments/{paymentId}/reconcile', [PaymentReconcileController::class, 'store']);
-    Route::get('/admin/subjects/{subjectId}/questions', [QuestionBankController::class, 'index']);
-    Route::post('/admin/subjects/{subjectId}/questions', [QuestionBankController::class, 'store']);
-    Route::get('/admin/subjects/{subjectId}/exam-config', [SubjectExamConfigController::class, 'show']);
-    Route::put('/admin/subjects/{subjectId}/exam-config', [SubjectExamConfigController::class, 'update']);
-    Route::patch(
-        '/admin/students/{studentId}/subjects/{subjectId}',
-        [StudentSubjectStatusController::class, 'update']
-    );
-    Route::post(
-        '/admin/prospects/{prospectId}/register-student',
-        [ProspectRegistrationController::class, 'registerStudent']
-    );
+    Route::middleware('employee.can:' . EmployeeAbility::ManageEmployees->value)->group(function () {
+        Route::get('/admin/employees', [EmployeeController::class, 'index']);
+        Route::post('/admin/employees', [EmployeeController::class, 'store']);
+        Route::patch('/admin/employees/{employeeId}', [EmployeeController::class, 'update']);
+    });
+
+    Route::middleware('employee.can:' . EmployeeAbility::ManageProspects->value)->group(function () {
+        Route::get('/admin/prospects', [AdminProspectController::class, 'index']);
+        Route::post('/admin/prospects/{prospectId}/register-student', [ProspectRegistrationController::class, 'registerStudent']);
+    });
+
+    Route::middleware('employee.can:' . EmployeeAbility::ManageStudents->value)->group(function () {
+        Route::get('/admin/students/by-email', [StudentLookupController::class, 'byEmail']);
+        Route::patch('/admin/students/{studentId}/subjects/{subjectId}', [StudentSubjectStatusController::class, 'update']);
+    });
+
+    Route::middleware('employee.can:' . EmployeeAbility::ManageCalendars->value)->group(function () {
+        Route::get('/admin/calendar-templates', [CalendarTemplateController::class, 'index']);
+        Route::post('/admin/calendar-templates', [CalendarTemplateController::class, 'store']);
+        Route::put('/admin/calendar-templates/{templateId}', [CalendarTemplateController::class, 'update']);
+        Route::post('/admin/students/{studentId}/calendar-assignment', [StudentCalendarAssignmentController::class, 'assign']);
+    });
+
+    Route::middleware('employee.can:' . EmployeeAbility::ManagePayments->value)->group(function () {
+        Route::post('/admin/prospects/{prospectId}/payments/cash', [CashPaymentController::class, 'store']);
+        Route::post('/admin/payments/{paymentId}/reconcile', [PaymentReconcileController::class, 'store']);
+    });
+
+    Route::middleware('employee.can:' . EmployeeAbility::ManageSubjects->value)->group(function () {
+        Route::get('/admin/subjects/{subjectId}/questions', [QuestionBankController::class, 'index']);
+        Route::post('/admin/subjects/{subjectId}/questions', [QuestionBankController::class, 'store']);
+        Route::get('/admin/subjects/{subjectId}/exam-config', [SubjectExamConfigController::class, 'show']);
+        Route::put('/admin/subjects/{subjectId}/exam-config', [SubjectExamConfigController::class, 'update']);
+    });
 });

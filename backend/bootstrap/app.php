@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'student.onboarding' => \App\Http\Middleware\EnsureStudentOnboardingCompleted::class,
+            'employee.can' => \App\Http\Middleware\EnsureEmployeeCan::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

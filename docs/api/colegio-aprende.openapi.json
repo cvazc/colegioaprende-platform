@@ -23,7 +23,8 @@
     { "name": "Prospects" },
     { "name": "Payments" },
     { "name": "Exams" },
-    { "name": "Questions" }
+    { "name": "Questions" },
+    { "name": "Employees" }
   ],
   "paths": {
     "/api/auth/login": {
@@ -518,6 +519,119 @@
           },
           "403": {
             "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/employees": {
+      "get": {
+        "summary": "List employees (admin only)",
+        "tags": ["Admin", "Employees"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Employees list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminEmployeesListResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create employee (admin only)",
+        "tags": ["Admin", "Employees"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminEmployeeCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminEmployeeResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/employees/{employeeId}": {
+      "patch": {
+        "summary": "Update employee (admin only)",
+        "tags": ["Admin", "Employees"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "employeeId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminEmployeeUpdateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminEmployeeResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Employee not found",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" }
@@ -1375,8 +1489,65 @@
           "first_name": { "type": "string" },
           "surnames": { "type": "string" },
           "employee_type": { "type": "integer", "nullable": true },
+          "role_label": { "type": "string", "nullable": true },
+          "permissions": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": { "type": "boolean" }
+          },
           "status": { "type": "string", "nullable": true },
           "profile_completed_at": { "type": "string", "nullable": true }
+        }
+      },
+      "AdminEmployeeSummary": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "first_name": { "type": "string" },
+          "surnames": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "employee_type": { "type": "integer" },
+          "role_label": { "type": "string", "enum": ["admin", "staff"] },
+          "permissions": {
+            "type": "object",
+            "additionalProperties": { "type": "boolean" }
+          }
+        }
+      },
+      "AdminEmployeesListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/AdminEmployeeSummary" }
+          }
+        }
+      },
+      "AdminEmployeeCreateRequest": {
+        "type": "object",
+        "required": ["first_name", "surnames", "email", "password", "employee_type"],
+        "properties": {
+          "first_name": { "type": "string" },
+          "surnames": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string", "minLength": 8 },
+          "employee_type": { "type": "integer", "enum": [1, 2] }
+        }
+      },
+      "AdminEmployeeUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "first_name": { "type": "string" },
+          "surnames": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string", "minLength": 8 },
+          "employee_type": { "type": "integer", "enum": [1, 2] }
+        }
+      },
+      "AdminEmployeeResponse": {
+        "type": "object",
+        "properties": {
+          "data": { "$ref": "#/components/schemas/AdminEmployeeSummary" }
         }
       },
       "StudentSubject": {
