@@ -70,6 +70,8 @@ class PaymentService
             }
             $student->save();
 
+            app(CohortAssignmentService::class)->assignAutomatically($student, 'payment_approved');
+
             $creditsToAdd = $item->credit_qty * max(1, (int) $payment->quantity);
             if ($creditsToAdd > 0) {
                 $this->addCredits($student->id, $payment->id, $creditsToAdd, 'payment_credit');

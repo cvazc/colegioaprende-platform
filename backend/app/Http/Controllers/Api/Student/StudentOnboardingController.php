@@ -6,6 +6,7 @@ use App\Enums\StudentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\StudentOnboardingUpdateRequest;
 use App\Models\Student;
+use App\Services\CohortAssignmentService;
 
 class StudentOnboardingController extends Controller
 {
@@ -21,6 +22,8 @@ class StudentOnboardingController extends Controller
         $user->profile_completed_at = now();
         $user->status = StudentStatus::InProgress;
         $user->save();
+
+        app(CohortAssignmentService::class)->assignAutomatically($user, 'onboarding_completed');
 
         return response()->json([
             'data' => [

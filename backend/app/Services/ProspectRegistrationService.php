@@ -101,6 +101,8 @@ class ProspectRegistrationService
             $prospect->registered_as_student_at = now();
             $prospect->save();
 
+            app(CohortAssignmentService::class)->assignAutomatically($student, 'prospect_registered');
+
             return $student;
         });
     }
