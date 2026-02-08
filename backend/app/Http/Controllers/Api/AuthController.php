@@ -42,6 +42,8 @@ class AuthController extends Controller
                     'first_name' => $employee->first_name,
                     'surnames' => $employee->surnames,
                     'employee_type' => $employee->employee_type,
+                    'role_label' => $employee->roleLabel(),
+                    'permissions' => $employee->permissions(),
                 ],
             ]);
         }
@@ -82,7 +84,26 @@ class AuthController extends Controller
         return response()->json([
             'data' => [
                 'role' => $role,
-                'user' => $user,
+                'user' => match (true) {
+                    $user instanceof Employee => [
+                        'id' => $user->id,
+                        'email' => $user->email,
+                        'first_name' => $user->first_name,
+                        'surnames' => $user->surnames,
+                        'employee_type' => $user->employee_type,
+                        'role_label' => $user->roleLabel(),
+                        'permissions' => $user->permissions(),
+                    ],
+                    $user instanceof Student => [
+                        'id' => $user->id,
+                        'email' => $user->email,
+                        'first_name' => $user->first_name,
+                        'surnames' => $user->surnames,
+                        'status' => $user->status?->value,
+                        'profile_completed_at' => $user->profile_completed_at,
+                    ],
+                    default => $user,
+                },
             ]
         ]);
     }
