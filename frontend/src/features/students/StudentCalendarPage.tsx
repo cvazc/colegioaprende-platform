@@ -1,26 +1,24 @@
 import { useQuery } from '@tanstack/react-query';
-import { http } from '@/shared/api/http';
+import { getStudentCalendar } from '@/shared/api/student-api';
 import { Card } from '@/shared/ui/Card';
 
-type Event = {
-  id: number;
-  title: string;
-  due_date: string;
-  is_payment: boolean;
-};
+function formatDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
 
-type Response = {
-  data: {
-    calendar_name: string;
-    events: Event[];
-  } | null;
-  message?: string;
-};
+  return date.toLocaleDateString('es-MX', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
 export function StudentCalendarPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['student-calendar'],
-    queryFn: async () => (await http.get<Response>('/student/calendar')).data,
+    queryFn: getStudentCalendar,
   });
 
   return (
@@ -37,7 +35,7 @@ export function StudentCalendarPage() {
             {data.data.events.map((event) => (
               <li key={event.id} className="rounded-lg border border-slate-200 p-3 text-sm">
                 <p className="font-semibold text-slate-800">{event.title}</p>
-                <p className="text-slate-600">Fecha: {event.due_date}</p>
+                <p className="text-slate-600">Fecha: {formatDate(event.due_date)}</p>
                 <p className="text-slate-500">{event.is_payment ? 'Pago' : 'Actividad'}</p>
               </li>
             ))}
