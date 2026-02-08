@@ -191,6 +191,47 @@
         }
       }
     },
+    "/api/student/onboarding": {
+      "put": {
+        "summary": "Complete student onboarding profile",
+        "tags": ["Students"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/StudentOnboardingRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Onboarding completed",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StudentOnboardingResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/student/subjects/{subjectId}/unlock": {
       "post": {
         "summary": "Unlock subject with credits",
@@ -461,6 +502,31 @@
         }
       }
     },
+    "/api/student/calendar": {
+      "get": {
+        "summary": "Get my assigned calendar",
+        "tags": ["Students"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Calendar data (or null if not assigned)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StudentCalendarResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/students/by-email": {
       "get": {
         "summary": "Find student by email",
@@ -693,6 +759,144 @@
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/calendar-templates": {
+      "get": {
+        "summary": "List calendar templates",
+        "tags": ["Admin"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Calendar templates",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminCalendarTemplateListResponse" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create calendar template",
+        "tags": ["Admin"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminCalendarTemplateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminCalendarTemplateResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/calendar-templates/{templateId}": {
+      "put": {
+        "summary": "Update calendar template",
+        "tags": ["Admin"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "templateId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminCalendarTemplateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminCalendarTemplateResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Template not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/students/{studentId}/calendar-assignment": {
+      "post": {
+        "summary": "Assign calendar template to student",
+        "tags": ["Admin", "Students"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "studentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminStudentCalendarAssignRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assigned",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminStudentCalendarAssignResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Student not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
               }
             }
           }
@@ -1170,7 +1374,9 @@
           "email": { "type": "string", "format": "email" },
           "first_name": { "type": "string" },
           "surnames": { "type": "string" },
-          "employee_type": { "type": "integer", "nullable": true }
+          "employee_type": { "type": "integer", "nullable": true },
+          "status": { "type": "string", "nullable": true },
+          "profile_completed_at": { "type": "string", "nullable": true }
         }
       },
       "StudentSubject": {
@@ -1288,7 +1494,8 @@
             "type": "object",
             "properties": {
               "id": { "type": "integer" },
-              "email": { "type": "string", "format": "email" }
+              "email": { "type": "string", "format": "email" },
+              "status": { "type": "string" }
             }
           }
         }
@@ -1312,6 +1519,9 @@
           "deposit_date": { "type": "string", "nullable": true },
           "course_type": { "type": "string" },
           "enrollment_type": { "type": "string" },
+          "status": { "type": "string", "nullable": true },
+          "last_payment_at": { "type": "string", "nullable": true },
+          "registered_as_student_at": { "type": "string", "nullable": true },
           "created_at": { "type": "string" }
         }
       },
@@ -1695,6 +1905,139 @@
                   }
                 }
               }
+            }
+          }
+        }
+      },
+      "StudentOnboardingRequest": {
+        "type": "object",
+        "required": ["movil_phone", "birth_date", "actual_address", "city", "actual_state"],
+        "properties": {
+          "movil_phone": { "type": "string" },
+          "birth_date": { "type": "string", "format": "date" },
+          "actual_address": { "type": "string" },
+          "city": { "type": "string" },
+          "actual_state": { "type": "string" },
+          "occupation": { "type": "string", "nullable": true },
+          "curp": { "type": "string", "nullable": true },
+          "emergency_contact": { "type": "string", "nullable": true },
+          "local_phone": { "type": "string", "nullable": true },
+          "profile_photo_path": { "type": "string", "nullable": true }
+        }
+      },
+      "StudentOnboardingResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "student_id": { "type": "integer" },
+              "status": { "type": "string" },
+              "profile_completed_at": { "type": "string", "nullable": true }
+            }
+          }
+        }
+      },
+      "StudentCalendarEvent": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "event_code": { "type": "string", "nullable": true },
+          "title": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "due_date": { "type": "string", "format": "date", "nullable": true },
+          "is_payment": { "type": "boolean" }
+        }
+      },
+      "StudentCalendarResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "calendar_template_id": { "type": "integer" },
+              "calendar_name": { "type": "string", "nullable": true },
+              "assigned_start_date": { "type": "string", "nullable": true },
+              "events": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/StudentCalendarEvent" }
+              }
+            }
+          },
+          "message": { "type": "string", "nullable": true }
+        }
+      },
+      "AdminCalendarEventInput": {
+        "type": "object",
+        "required": ["title", "due_date"],
+        "properties": {
+          "event_code": { "type": "string", "nullable": true },
+          "title": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "due_date": { "type": "string", "format": "date" },
+          "is_payment": { "type": "boolean" },
+          "is_active": { "type": "boolean" }
+        }
+      },
+      "AdminCalendarTemplateRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "is_active": { "type": "boolean" },
+          "events": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/AdminCalendarEventInput" }
+          }
+        }
+      },
+      "AdminCalendarTemplate": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "is_active": { "type": "boolean" },
+          "created_by_employee_id": { "type": "integer", "nullable": true },
+          "events": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/StudentCalendarEvent" }
+          }
+        }
+      },
+      "AdminCalendarTemplateResponse": {
+        "type": "object",
+        "properties": {
+          "data": { "$ref": "#/components/schemas/AdminCalendarTemplate" }
+        }
+      },
+      "AdminCalendarTemplateListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/AdminCalendarTemplate" }
+          }
+        }
+      },
+      "AdminStudentCalendarAssignRequest": {
+        "type": "object",
+        "required": ["calendar_template_id"],
+        "properties": {
+          "calendar_template_id": { "type": "integer" },
+          "assigned_start_date": { "type": "string", "format": "date", "nullable": true }
+        }
+      },
+      "AdminStudentCalendarAssignResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "student_id": { "type": "integer" },
+              "calendar_template_id": { "type": "integer" },
+              "assigned_start_date": { "type": "string", "nullable": true }
             }
           }
         }

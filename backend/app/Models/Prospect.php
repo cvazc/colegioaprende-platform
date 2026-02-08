@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProspectStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -32,5 +33,14 @@ class Prospect extends Model
         'deposit_date',
         'course_type',
         'enrollment_type',
+        'status',
+        'last_payment_at',
+        'registered_as_student_at',
+    ];
+
+    protected $casts = [
+        'status' => ProspectStatus::class,
+        'last_payment_at' => 'datetime',
+        'registered_as_student_at' => 'datetime',
     ];
 }

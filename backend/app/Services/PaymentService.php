@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\ProspectStatus;
+use App\Enums\StudentStatus;
 use App\Models\Payment;
 use App\Models\PaymentItem;
 use App\Models\ControlSubjectStudent;
@@ -38,6 +40,14 @@ class PaymentService
             $payment->approved_at = $payment->approved_at ?: now();
             $payment->save();
 
+            if ($payment->prospect) {
+                $payment->prospect->last_payment_at = now();
+                if ($payment->prospect->status === ProspectStatus::PendingPayment) {
+                    $payment->prospect->status = ProspectStatus::PaymentConfirmed;
+                }
+                $payment->prospect->save();
+            }
+
             if (!$item) {
                 return;
             }
@@ -52,6 +62,13 @@ class PaymentService
             if (!$student) {
                 return;
             }
+
+            if ($student->profile_completed_at === null) {
+                $student->status = StudentStatus::OnboardingPending;
+            } elseif ($student->status === StudentStatus::OnboardingPending || $student->status === StudentStatus::Active) {
+                $student->status = StudentStatus::InProgress;
+            }
+            $student->save();
 
             $creditsToAdd = $item->credit_qty * max(1, (int) $payment->quantity);
             if ($creditsToAdd > 0) {

@@ -58,6 +58,8 @@ class AuthController extends Controller
                     'email' => $student->email,
                     'first_name' => $student->first_name,
                     'surnames' => $student->surnames,
+                    'status' => $student->status?->value,
+                    'profile_completed_at' => $student->profile_completed_at,
                 ],
             ]);
         }

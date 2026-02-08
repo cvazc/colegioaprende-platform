@@ -7,14 +7,18 @@ use App\Http\Controllers\Api\Admin\ProspectController as AdminProspectController
 use App\Http\Controllers\Api\Admin\PaymentReconcileController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Admin\CashPaymentController;
+use App\Http\Controllers\Api\Admin\CalendarTemplateController;
+use App\Http\Controllers\Api\Admin\StudentCalendarAssignmentController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PaymentItemController;
 use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\ProspectController;
+use App\Http\Controllers\Api\StudentCalendarController;
 use App\Http\Controllers\Api\StudentCreditController;
 use App\Http\Controllers\Api\StudentExamAttemptController;
 use App\Http\Controllers\Api\StudentPaymentController;
 use App\Http\Controllers\Api\StudentProgressController;
+use App\Http\Controllers\Api\Student\StudentOnboardingController;
 use App\Http\Controllers\Api\StudentSubjectController;
 use App\Http\Controllers\Api\StudentSubjectUnlockController;
 use App\Http\Controllers\Api\Admin\QuestionBankController;
@@ -29,16 +33,26 @@ Route::post('/payments/webhooks/{provider}', [PaymentWebhookController::class, '
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
-    Route::get('/student/subjects', [StudentSubjectController::class, 'index']);
-    Route::get('/student/progress', [StudentProgressController::class, 'show']);
-    Route::post('/student/subjects/{subjectId}/unlock', [StudentSubjectUnlockController::class, 'store']);
-    Route::post('/student/subjects/{subjectId}/exam-attempts', [StudentExamAttemptController::class, 'store']);
-    Route::get('/student/exam-attempts/{attemptId}', [StudentExamAttemptController::class, 'show']);
-    Route::post('/student/exam-attempts/{attemptId}/answers', [StudentExamAttemptController::class, 'submit']);
-    Route::get('/student/payments', [StudentPaymentController::class, 'index']);
-    Route::get('/student/credits', [StudentCreditController::class, 'show']);
+    Route::put('/student/onboarding', [StudentOnboardingController::class, 'update']);
+
+    Route::middleware('student.onboarding')->group(function () {
+        Route::get('/student/subjects', [StudentSubjectController::class, 'index']);
+        Route::get('/student/progress', [StudentProgressController::class, 'show']);
+        Route::post('/student/subjects/{subjectId}/unlock', [StudentSubjectUnlockController::class, 'store']);
+        Route::post('/student/subjects/{subjectId}/exam-attempts', [StudentExamAttemptController::class, 'store']);
+        Route::get('/student/exam-attempts/{attemptId}', [StudentExamAttemptController::class, 'show']);
+        Route::post('/student/exam-attempts/{attemptId}/answers', [StudentExamAttemptController::class, 'submit']);
+        Route::get('/student/payments', [StudentPaymentController::class, 'index']);
+        Route::get('/student/credits', [StudentCreditController::class, 'show']);
+        Route::get('/student/calendar', [StudentCalendarController::class, 'show']);
+    });
+
     Route::get('/admin/students/by-email', [StudentLookupController::class, 'byEmail']);
     Route::get('/admin/prospects', [AdminProspectController::class, 'index']);
+    Route::get('/admin/calendar-templates', [CalendarTemplateController::class, 'index']);
+    Route::post('/admin/calendar-templates', [CalendarTemplateController::class, 'store']);
+    Route::put('/admin/calendar-templates/{templateId}', [CalendarTemplateController::class, 'update']);
+    Route::post('/admin/students/{studentId}/calendar-assignment', [StudentCalendarAssignmentController::class, 'assign']);
     Route::post('/admin/prospects/{prospectId}/payments/cash', [CashPaymentController::class, 'store']);
     Route::post('/admin/payments/{paymentId}/reconcile', [PaymentReconcileController::class, 'store']);
     Route::get('/admin/subjects/{subjectId}/questions', [QuestionBankController::class, 'index']);
