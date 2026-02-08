@@ -31,6 +31,11 @@ class CalendarTemplate extends Model
         return $this->hasMany(StudentCalendar::class, 'calendar_template_id');
     }
 
+    public function cohorts(): HasMany
+    {
+        return $this->hasMany(Cohort::class, 'calendar_template_id');
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'created_by_employee_id');

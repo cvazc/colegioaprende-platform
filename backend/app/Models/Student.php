@@ -6,6 +6,7 @@ use App\Enums\StudentStatus;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Laravel\Sanctum\HasApiTokens;
 
 class Student extends Authenticatable
@@ -31,6 +32,23 @@ class Student extends Authenticatable
     public function calendarAssignment(): HasOne
     {
         return $this->hasOne(StudentCalendar::class, 'student_id');
+    }
+
+    public function cohortMembership(): HasOne
+    {
+        return $this->hasOne(CohortMember::class, 'student_id');
+    }
+
+    public function cohort(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Cohort::class,
+            CohortMember::class,
+            'student_id',
+            'id',
+            'id',
+            'cohort_id'
+        );
     }
 
     protected $fillable = [

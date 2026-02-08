@@ -24,7 +24,8 @@
     { "name": "Payments" },
     { "name": "Exams" },
     { "name": "Questions" },
-    { "name": "Employees" }
+    { "name": "Employees" },
+    { "name": "Cohorts" }
   ],
   "paths": {
     "/api/auth/login": {
@@ -522,6 +523,202 @@
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/student/cohort": {
+      "get": {
+        "summary": "Get my cohort assignment",
+        "tags": ["Students", "Cohorts"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Cohort assignment or null",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StudentCohortResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/cohorts": {
+      "get": {
+        "summary": "List cohorts",
+        "tags": ["Admin", "Cohorts"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Cohorts list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminCohortsListResponse" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create cohort",
+        "tags": ["Admin", "Cohorts"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminCohortRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminCohortResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/cohorts/{cohortId}": {
+      "put": {
+        "summary": "Update cohort",
+        "tags": ["Admin", "Cohorts"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "cohortId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminCohortRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminCohortResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Cohort not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/cohorts/{cohortId}/members": {
+      "get": {
+        "summary": "Get cohort members",
+        "tags": ["Admin", "Cohorts"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "cohortId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Members list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminCohortMembersResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Cohort not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/students/{studentId}/cohort-assignment": {
+      "post": {
+        "summary": "Assign student to cohort",
+        "tags": ["Admin", "Cohorts", "Students"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "studentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminStudentCohortAssignRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assigned",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminStudentCohortAssignResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Student not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
               }
             }
           }
@@ -1548,6 +1745,163 @@
         "type": "object",
         "properties": {
           "data": { "$ref": "#/components/schemas/AdminEmployeeSummary" }
+        }
+      },
+      "CohortRuleInput": {
+        "type": "object",
+        "required": ["field", "operator", "value"],
+        "properties": {
+          "field": { "type": "string" },
+          "operator": { "type": "string", "enum": ["equals", "not_equals", "in", "not_in"] },
+          "value": { "type": "string" },
+          "is_active": { "type": "boolean" }
+        }
+      },
+      "CohortRule": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "field": { "type": "string" },
+          "operator": { "type": "string" },
+          "value": { "type": "string" },
+          "is_active": { "type": "boolean" }
+        }
+      },
+      "CohortSummary": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "course_type": { "type": "string", "nullable": true },
+          "enrollment_type": { "type": "string", "nullable": true },
+          "calendar_template_id": { "type": "integer", "nullable": true },
+          "capacity": { "type": "integer", "nullable": true },
+          "starts_at": { "type": "string", "format": "date", "nullable": true },
+          "ends_at": { "type": "string", "format": "date", "nullable": true },
+          "auto_assign": { "type": "boolean" },
+          "is_active": { "type": "boolean" },
+          "active_members_count": { "type": "integer", "nullable": true },
+          "waitlist_members_count": { "type": "integer", "nullable": true },
+          "rules": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CohortRule" }
+          }
+        }
+      },
+      "AdminCohortRequest": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "course_type": { "type": "string", "nullable": true },
+          "enrollment_type": { "type": "string", "nullable": true },
+          "calendar_template_id": { "type": "integer", "nullable": true },
+          "capacity": { "type": "integer", "minimum": 1, "nullable": true },
+          "starts_at": { "type": "string", "format": "date", "nullable": true },
+          "ends_at": { "type": "string", "format": "date", "nullable": true },
+          "auto_assign": { "type": "boolean" },
+          "is_active": { "type": "boolean" },
+          "rules": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CohortRuleInput" }
+          }
+        }
+      },
+      "AdminCohortResponse": {
+        "type": "object",
+        "properties": {
+          "data": { "$ref": "#/components/schemas/CohortSummary" }
+        }
+      },
+      "AdminCohortsListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CohortSummary" }
+          }
+        }
+      },
+      "CohortMemberSummary": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "student_id": { "type": "integer" },
+          "cohort_id": { "type": "integer" },
+          "status": { "type": "string" },
+          "source": { "type": "string" },
+          "assigned_at": { "type": "string", "nullable": true },
+          "student": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "id": { "type": "integer" },
+              "first_name": { "type": "string" },
+              "surnames": { "type": "string" },
+              "email": { "type": "string", "format": "email" },
+              "course_type": { "type": "string", "nullable": true },
+              "enrollment_type": { "type": "string", "nullable": true },
+              "status": { "type": "string", "nullable": true }
+            }
+          }
+        }
+      },
+      "AdminCohortMembersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "cohort": { "$ref": "#/components/schemas/CohortSummary" },
+              "members": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/CohortMemberSummary" }
+              }
+            }
+          }
+        }
+      },
+      "AdminStudentCohortAssignRequest": {
+        "type": "object",
+        "required": ["cohort_id"],
+        "properties": {
+          "cohort_id": { "type": "integer" },
+          "reason": { "type": "string", "nullable": true },
+          "force": { "type": "boolean" }
+        }
+      },
+      "AdminStudentCohortAssignResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "student_id": { "type": "integer" },
+              "cohort_id": { "type": "integer" },
+              "status": { "type": "string" },
+              "source": { "type": "string" },
+              "assigned_at": { "type": "string", "nullable": true }
+            }
+          }
+        }
+      },
+      "StudentCohortResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "cohort_id": { "type": "integer" },
+              "cohort_name": { "type": "string", "nullable": true },
+              "status": { "type": "string", "nullable": true },
+              "source": { "type": "string", "nullable": true },
+              "assigned_at": { "type": "string", "nullable": true },
+              "calendar_template_id": { "type": "integer", "nullable": true },
+              "calendar_name": { "type": "string", "nullable": true }
+            }
+          },
+          "message": { "type": "string", "nullable": true }
         }
       },
       "StudentSubject": {

@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\Admin\StudentSubjectStatusController;
 use App\Http\Controllers\Api\Admin\ProspectRegistrationController;
 use App\Http\Controllers\Api\Admin\ProspectController as AdminProspectController;
 use App\Http\Controllers\Api\Admin\PaymentReconcileController;
+use App\Http\Controllers\Api\Admin\CohortController;
+use App\Http\Controllers\Api\Admin\CohortAssignmentController;
 use App\Http\Controllers\Api\Admin\EmployeeController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Admin\CashPaymentController;
@@ -16,6 +18,7 @@ use App\Http\Controllers\Api\PaymentItemController;
 use App\Http\Controllers\Api\PaymentWebhookController;
 use App\Http\Controllers\Api\ProspectController;
 use App\Http\Controllers\Api\StudentCalendarController;
+use App\Http\Controllers\Api\StudentCohortController;
 use App\Http\Controllers\Api\StudentCreditController;
 use App\Http\Controllers\Api\StudentExamAttemptController;
 use App\Http\Controllers\Api\StudentPaymentController;
@@ -47,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/student/payments', [StudentPaymentController::class, 'index']);
         Route::get('/student/credits', [StudentCreditController::class, 'show']);
         Route::get('/student/calendar', [StudentCalendarController::class, 'show']);
+        Route::get('/student/cohort', [StudentCohortController::class, 'show']);
     });
 
     Route::middleware('employee.can:' . EmployeeAbility::ManageEmployees->value)->group(function () {
@@ -70,6 +74,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/calendar-templates', [CalendarTemplateController::class, 'store']);
         Route::put('/admin/calendar-templates/{templateId}', [CalendarTemplateController::class, 'update']);
         Route::post('/admin/students/{studentId}/calendar-assignment', [StudentCalendarAssignmentController::class, 'assign']);
+    });
+
+    Route::middleware('employee.can:' . EmployeeAbility::ManageCohorts->value)->group(function () {
+        Route::get('/admin/cohorts', [CohortController::class, 'index']);
+        Route::post('/admin/cohorts', [CohortController::class, 'store']);
+        Route::put('/admin/cohorts/{cohortId}', [CohortController::class, 'update']);
+        Route::get('/admin/cohorts/{cohortId}/members', [CohortController::class, 'members']);
+        Route::post('/admin/students/{studentId}/cohort-assignment', [CohortAssignmentController::class, 'assignStudent']);
     });
 
     Route::middleware('employee.can:' . EmployeeAbility::ManagePayments->value)->group(function () {
