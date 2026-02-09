@@ -23,7 +23,6 @@ class StudentOnboardingUpdateRequest extends FormRequest
             'curp' => ['nullable', 'string', 'max:255'],
             'emergency_contact' => ['nullable', 'string', 'max:255'],
             'local_phone' => ['nullable', 'string', 'max:15'],
-            'profile_photo_path' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

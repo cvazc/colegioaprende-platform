@@ -21,6 +21,7 @@ export type StudentUser = {
   surnames: string;
   status?: string | null;
   profile_completed_at?: string | null;
+  profile_photo_url?: string | null;
 };
 
 export type AuthUser = EmployeeUser | StudentUser;

@@ -39,6 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::put('/student/onboarding', [StudentOnboardingController::class, 'update']);
+    Route::post('/student/profile-photo', [StudentOnboardingController::class, 'uploadPhoto']);
 
     Route::middleware('student.onboarding')->group(function () {
         Route::get('/student/subjects', [StudentSubjectController::class, 'index']);
