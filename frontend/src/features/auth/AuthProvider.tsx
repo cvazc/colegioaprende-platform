@@ -8,6 +8,7 @@ type AuthContextValue = {
   loading: boolean;
   login: (payload: LoginPayload) => Promise<void>;
   logout: () => Promise<void>;
+  refreshSession: () => Promise<void>;
   hasPermission: (ability: string) => boolean;
 };
 
@@ -16,6 +17,25 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<AuthSession | null>(() => getStoredSession());
   const [loading, setLoading] = useState<boolean>(true);
+
+  const refreshSession = useCallback(async () => {
+    const stored = getStoredSession();
+    if (!stored?.token) {
+      setSession(null);
+      setStoredSession(null);
+      return;
+    }
+
+    const me = await meRequest();
+    const next: AuthSession = {
+      token: stored.token,
+      role: me.role === 'unknown' ? stored.role : me.role,
+      user: me.user,
+    };
+
+    setSession(next);
+    setStoredSession(next);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -93,9 +113,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loading,
       login,
       logout,
+      refreshSession,
       hasPermission,
     }),
-    [session, loading, login, logout, hasPermission]
+    [session, loading, login, logout, refreshSession, hasPermission]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

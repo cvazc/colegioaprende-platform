@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Rules\RecaptchaToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -62,6 +63,9 @@ class AuthController extends Controller
                     'surnames' => $student->surnames,
                     'status' => $student->status?->value,
                     'profile_completed_at' => $student->profile_completed_at,
+                    'profile_photo_url' => $student->profile_photo_path
+                        ? Storage::disk('public')->url($student->profile_photo_path)
+                        : null,
                 ],
             ]);
         }
@@ -101,6 +105,9 @@ class AuthController extends Controller
                         'surnames' => $user->surnames,
                         'status' => $user->status?->value,
                         'profile_completed_at' => $user->profile_completed_at,
+                        'profile_photo_url' => $user->profile_photo_path
+                            ? Storage::disk('public')->url($user->profile_photo_path)
+                            : null,
                     ],
                     default => $user,
                 },
