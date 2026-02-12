@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { Button } from '@/shared/ui/Button';
+import { BrandLogo } from '@/shared/ui/BrandLogo';
 import type { StudentUser } from '@/shared/types/auth';
 
 function getInitials(firstName?: string, surnames?: string) {
@@ -18,9 +19,10 @@ export function StudentLayout() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <header className="border-b border-slate-200 bg-white">
+      <header className="border-b border-brand-100 bg-white">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-3">
+            <BrandLogo className="h-10" />
             {photoUrl ? (
               <img
                 src={photoUrl}
