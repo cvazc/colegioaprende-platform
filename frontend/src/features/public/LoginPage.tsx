@@ -36,28 +36,32 @@ export function LoginPage() {
   }
 
   return (
-    <Card>
-      <h1 className="text-xl font-bold text-slate-900">Iniciar sesión</h1>
-      <form className="mt-6 grid gap-4 max-w-lg" onSubmit={onSubmit}>
-        <label className="grid gap-1 text-sm">
-          Correo
-          <Input name="email" type="email" required />
-        </label>
-        <label className="grid gap-1 text-sm">
-          Contraseña
-          <Input name="password" type="password" required />
-        </label>
-        <label className="grid gap-1 text-sm">
-          reCAPTCHA token (solo local/dev)
-          <Input name="recaptcha_token" placeholder="Opcional si no esta habilitado" />
-        </label>
-        <div className="flex items-center gap-3">
-          <Button type="submit" disabled={loading}>
-            {loading ? 'Entrando...' : 'Entrar'}
-          </Button>
-          {error && <span className="text-sm text-rose-700">{error}</span>}
-        </div>
-      </form>
-    </Card>
+    <div className="mx-auto max-w-xl">
+      <Card>
+        <h1 className="text-2xl font-bold text-slate-900">Iniciar sesion</h1>
+        <p className="mt-1 text-sm text-slate-600">Accede a tu panel de estudiante o administrativo.</p>
+
+        <form className="mt-6 grid gap-4" onSubmit={onSubmit}>
+          <label className="grid gap-1 text-sm">
+            Correo
+            <Input name="email" type="email" required />
+          </label>
+          <label className="grid gap-1 text-sm">
+            Contrasena
+            <Input name="password" type="password" required />
+          </label>
+          <label className="grid gap-1 text-sm">
+            reCAPTCHA token (solo local/dev)
+            <Input name="recaptcha_token" placeholder="Opcional si no esta habilitado" />
+          </label>
+          <div className="flex items-center gap-3">
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Entrando...' : 'Entrar'}
+            </Button>
+            {error && <span className="text-sm text-rose-700">{error}</span>}
+          </div>
+        </form>
+      </Card>
+    </div>
   );
 }
