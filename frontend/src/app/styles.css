@@ -1,14 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=Sora:wght@600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   color-scheme: light;
+  --color-brand-primary: #312278;
+  --color-brand-secondary: #02afc0;
+  --color-surface: #f7f7fb;
+  --color-text: #161628;
 }
 
 body {
-  @apply m-0 bg-slate-50 text-slate-900 antialiased;
-  font-family: "Manrope", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  @apply m-0 antialiased;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-family: 'Nunito Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Sora', 'Nunito Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 a {
