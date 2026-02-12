@@ -10,6 +10,8 @@
   --color-brand-secondary: #02afc0;
   --color-surface: #f7f7fb;
   --color-text: #161628;
+  --color-surface-dark: #0f1020;
+  --color-text-dark: #eff1ff;
 }
 
 body {
@@ -30,4 +32,33 @@ h6 {
 
 a {
   @apply text-brand-700 hover:text-brand-800;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: var(--color-surface-dark);
+  color: var(--color-text-dark);
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 700ms ease, transform 700ms ease;
+}
+
+.reveal.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.reveal-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
